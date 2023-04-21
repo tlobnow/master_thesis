@@ -1,3 +1,10 @@
+#         .
+#       ":"
+#     ___:____     |"\/"|
+#   ,'        `.    \  /
+#   |  O        \___/  |
+# ~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^
+
 load_dtConnOrLocal <- function(PATH_DT, PATH_LOCAL, FILE) {
   if ( DATA_TAY_CONNECTION == F ) { # source from local folder
     read_xlsx(path = paste0(PATH_LOCAL, FILE), sheet = 1, na = c("", " ", "NA", "NaN"))
@@ -9,25 +16,25 @@ load_dtConnOrLocal <- function(PATH_DT, PATH_LOCAL, FILE) {
 #######################################################################################################################
 #######################################################################################################################
 
-retrieveAccessionIDs <- function(df,OUT="retrievedAccessionIDs.txt") {
+retrieveAccessionIDs <- function(DF,OUT="retrievedAccessionIDs.txt") {
   # Select UniProt Accession Numbers and retain unique values
-  df_uniq <- df %>% select(Protein.IDs) %>% unique()
+  DF_uniq <- DF %>% select(Protein.IDs) %>% unique()
   
   # filter out contaminants
-  df_fil <- df_uniq %>% filter(!str_detect(Protein.IDs, paste("CON__")))
+  DF_fil <- DF_uniq %>% filter(!str_detect(Protein.IDs, paste("CON__")))
   
   # separate the joined protein IDs (sometimes multiple per row, separated by ";")
-  df_sep <- unlist(lapply(strsplit(df_fil$Protein.IDs, ";", fixed=TRUE), function(x) return(x[1:50]))) %>%
+  DF_sep <- unlist(lapply(strsplit(DF_fil$Protein.IDs, ";", fixed=TRUE), function(x) return(x[1:50]))) %>%
     unique()
   
   # filter out NAs
-  df_sep <- as.data.frame(df_sep) %>% drop_na()
+  DF_sep <- as.data.frame(DF_sep) %>% drop_na()
   
   # filter out invalid Accession IDs ("REV__")
-  df_sep <- df_sep %>% filter(!str_detect(df_sep, paste("REV__")))
+  DF_sep <- DF_sep %>% filter(!str_detect(DF_sep, paste("REV__")))
   
   # write text file
-  write.table(x = df_sep, 
+  write.table(x = DF_sep, 
               file = OUT, 
               quote = F, sep = "\t", row.names = F, col.names = F)
 }
@@ -107,4 +114,11 @@ slurmExtract <- function(SLURM, OUT) {
   EXTRACT       <- unique(EXTRACT)
   
   write.table(EXTRACT, file = paste0(OUT ,".csv"),sep = ",", append = T, quote = F, row.names = F, col.names = F)
+}
+
+
+join_timepoints <- function(DF1, DF2, DF3, OUT) {
+  # Join the initial dataframes derived from protein X pull down
+  DF <- full_join(DF1, DF2)
+  DF <- full_join(DF, DF3)
 }
