@@ -1,6 +1,9 @@
-################################################################################
-################################################################################
-################################################################################
+#         .
+#       ":"
+#     ___:____     |"\/"|
+#   ,'        `.    \  /
+#   |  O        \___/  |
+# ~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^
 
 ### LOAD LIBRARIES
 library(tidyverse)
@@ -10,29 +13,34 @@ library(janitor)
 library(ggrepel)
 library(UniprotR)
 
-
 ### LOAD EXTERNAL FUNCTIONS
 source(file = ifelse(exists("https://raw.githubusercontent.com/tlobnow/master_thesis/main/functions.R"), 
                      yes =  "https://raw.githubusercontent.com/tlobnow/master_thesis/main/functions.R",
                      no  =  "~/Documents/Github/master_thesis/functions.R"))
 
 ### SET MODES
-SLURM_XTRCT   = F
-CHIMERA_XTRCT = F
-JSON_XTRCT    = F
+SLURM_XTRCT   = T
+JSON_XTRCT    = T
 PROCESS_SLURM = T
 PROCESS_JSON  = T
 ANNOTATE      = T
 
 
 ### DEFINE PATHS
-MAIN    = ifelse(dir.exists("/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS/"), 
-                 yes =  "/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS/",
-                 no  =  "~/Documents/Github/transferGit/IP_MS/")
+MAIN    = ifelse(dir.exists("/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/"), 
+                 yes =  "/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/",
+                 no  =  "~/Documents/Github/transferGit/")
+
+#MAIN = "~/Documents/Github/transferGit/"
+#MAIN = "/Volumes/TAYLOR-LAB/Finn/RESULTS/"
+### DEFINE PATHS
+#MAIN    = "~/Desktop/"
 FOLDER  = "MYD88"
-CSV_LOC = "~/Documents/Github/master_thesis/files_csv/"
-TXT_LOC = "~/Documents/Github/master_thesis/files_txt/"
-OUT     = paste0(CSV_LOC, FOLDER)
+#FOLDER  = "IRAK4"
+#FOLDER  = "IRAK1"
+
+FILES_LOC = "~/Documents/Github/master_thesis/"
+OUT     = paste0(FILES_LOC, FOLDER)
 
 ################################################################################
 ################################################################################
@@ -45,9 +53,8 @@ if (SLURM_XTRCT == T) {
   LIST = list.files(LOCATION, pattern = "_x")
   for (FILE in LIST) {
     SLURM = paste0(LOCATION, "/", FILE, "/slurm.out")
-    OUT   = paste0(CSV_LOC, FOLDER)
+    OUT   = paste0(FILES_LOC, "SLURM_EXTRACTED/", FOLDER)
     rs <- tryCatch(slurmExtract(SLURM = SLURM, OUT = OUT), 
-                   #finally = print("whoops"),
                    error=function(e) NULL)
     if (is.null(rs)){
       print(paste(" -(^o^)- ", FILE, "loaded!"))
@@ -59,67 +66,42 @@ if (SLURM_XTRCT == T) {
   } 
 }
 
-### EXTRACT CHIMERA FILES
-if (CHIMERA_XTRCT == T) {
-  log <- read.table(paste0(TXT_LOC, FOLDER, "_log.txt"), header = F, sep = "\t")
-  
-  log$info <- NA
-  log$info[grep("Chain information for *", log$V1)] <- T
-  
-  log$buried <- NA
-  log$buried[grep("* buried areas: *",     log$V1)] <- T
-  
-  # extract the INFO lines and save in 1-col-df
-  INFO   <- log %>% filter(log$info   == T) %>% mutate(INFO   = V1) %>% select(INFO) 
-  
-  # extract the BURIED lines and save in 1-col-df
-  BURIED <- log %>% filter(log$buried == T) %>% mutate(BURIED = V1) %>% select(BURIED)
-  
-  # Collect and manipulate data from the LOG DATA
-  LOG <- bind_cols(INFO, BURIED) # bind cols - due to same order they now align according w/ info
-  LOG$INFO <- unlist(lapply(strsplit(LOG$INFO, " ", fixed=TRUE), function(x) return(x[4])))
-  LOG$INFO <- unlist(lapply(strsplit(LOG$INFO, ".", fixed=TRUE), function(x) return(x[1])))
-  
-  # extract names as INFO
-  LOG$FILE <- unlist(lapply(strsplit(LOG$INFO, "_rlx", fixed=TRUE), function(x) return(x[1])))
-  
-  # extract interface information
-  LOG$INTERFACES <- unlist(lapply(strsplit(LOG$BURIED, ": ", fixed=TRUE), function(x) return(x[2])))
-  
-  # separate interface info
-  LOG <- separate(data = LOG, col = INTERFACES, sep = ", ", into = c("INTERFACE_1", "INTERFACE_2", "INTERFACE_3", "INTERFACE_4", "INTERFACE_5", "INTERFACE_6", "INTERFACE_7", "INTERFACE_8", "INTERFACE_9", "INTERFACE_10","INTERFACE_11", "INTERFACE_12", "INTERFACE_13", "INTERFACE_14", "INTERFACE_15", "INTERFACE_16", "INTERFACE_17", "INTERFACE_18", "INTERFACE_19", "INTERFACE_20", "INTERFACE_21", "INTERFACE_22", "INTERFACE_23", "INTERFACE_24", "INTERFACE_25", "INTERFACE_26", "INTERFACE_27", "INTERFACE_28", "INTERFACE_29", "INTERFACE_30"), convert = T, remove = T)
-  
-  # extract the number of buried interfaces
-  LOG$BURIED <- as.numeric(unlist(lapply(strsplit(LOG$BURIED, " ", fixed=TRUE), function(x) return(x[1]))))
-  
-  # retain unique samples only
-  LOG       <- unique(LOG) 
-  LOG$MODEL <- unlist(lapply(strsplit(LOG$INFO, "_model_", fixed=TRUE), function(x) return(x[2])))
-  LOG$MODEL <- unlist(lapply(strsplit(LOG$MODEL, "_rlx", fixed=TRUE), function(x) return(x[1])))
-  
-  # write csv file
-  write.csv(LOG, paste0(CSV_LOC, "INTERFACES_", FOLDER,".csv"), row.names = F)
-}
 
 ### EXTRACT JSON FILES
 if (JSON_XTRCT == T) {
-  # GENERATE FILE
+  # replace all "Infinity" strings with large number (9999)
+  #system(command = paste0("grep -rl Infinity ", MAIN, FOLDER, " | xargs sed -i '' -e 's/Infinity/9999/g'"))
+  # remove pre-existing csv file, append would lead to duplicate rows
   system(command = paste0(" [ -f ", OUT ,"_fromJSON.csv ] && rm ", OUT, "_fromJSON.csv"))
+  
+  # GENERATE FILE
   LOCATION = paste0(MAIN, FOLDER)
-  LIST = list.files(LOCATION, pattern = "_x1")
+  #LIST = list.files(LOCATION, pattern = "_x1")
+  #LIST = list.files(LOCATION, pattern = "_x")
+  LIST = list.files(LOCATION)
+  FILE="MYD88_A2A791_x1"
   for (FILE in LIST) {
-    for (i in 1:5) {
-      JSON = paste0(LOCATION, "/" , FILE, "/JSON/", FILE, "_ranking_model_",i,".json")
-      OUT   = paste0(CSV_LOC, FOLDER)
-      jsonExtract_1.1_ratio(JSON = JSON, OUT = OUT)
-    } 
+    print(paste0("processing ", FILE))
+    maxJSON=list.files(paste0(LOCATION, "/" , FILE, "/JSON/"))
+    #system(command = paste0("grep -rl Infinity ", MAIN, FOLDER,"/", FILE, " | xargs sed -i '' -e 's/Infinity/9999/g'"))
+    if (length(maxJSON) > 0) {
+      for (i in 1:length(maxJSON)) { # 1:5) {#paste0(LOCATION, "/" , FILE, "/JSON/*.json")) {
+        JSON  = paste0(LOCATION, "/" , FILE, "/JSON/", FILE, "_ranking_model_",i,".json")
+        OUT   = paste0(FILES_LOC, "JSON_EXTRACTED/", FOLDER)
+        jsonExtract_1.1_ratio(JSON = JSON, OUT = OUT)
+      } 
+    } else {
+      next
+      print(paste0("skipped", FILE))
+    }
   }
 }
 
 ### PROCESS SLURM SUMMARY FILE
 if (PROCESS_SLURM == T) {
   
-  SLURM_EXTRACT  <- read.csv(paste0(CSV_LOC, FOLDER,".csv"), header = F) %>% mutate(ORIGIN = FOLDER) %>% setnames(old = c("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12"), new = c("FILE", "MODEL", "TOL", "pLDDT", "pTM", "piTM", "iScore", "iRes", "iCnt", "FILE_MODEL", "NUM_CLUSTERS", "N_MONOMERS"), skip_absent = T) 
+  SLURM_EXTRACT  <- read.csv(paste0(FILES_LOC, "SLURM_EXTRACTED/", FOLDER,".csv"), header = F) %>% 
+    mutate(ORIGIN = FOLDER) %>% setnames(old = c("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12"), new = c("FILE", "MODEL", "TOL", "pLDDT", "pTM", "piTM", "iScore", "iRes", "iCnt", "FILE_MODEL", "NUM_CLUSTERS", "N_MONOMERS"), skip_absent = T) 
   
   # make sure that there are no "+" in the file names // MUST BE COHERENT WITH CHIMERA XTRACT NAME THOUGH!
   #SLURM_EXTRACT$FILE <- gsub("\\+", replacement = "_", x = SLURM_EXTRACT$FILE)
@@ -138,76 +120,58 @@ if (PROCESS_SLURM == T) {
            VIS = case_when(iScore == 0 | piTM == 0 ~ "none")) %>% 
     distinct(FILE_MODEL, .keep_all = T)
   
-  write.csv(SE, paste0(CSV_LOC, "df_", FOLDER,".csv"), row.names = F)
+  write.csv(SE, paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"), row.names = F)
   
 } 
 
 ### PROCESS JSON SUMMARY FILE
 if (PROCESS_JSON == T) {
   # READ FILE
-  JSON_EXTRACT  <- read.csv(paste0(CSV_LOC, FOLDER, "_fromJSON.csv"), header = F) %>% 
+  JSON_EXTRACT  <- read.csv(paste0(FILES_LOC, "JSON_EXTRACTED/", FOLDER, "_fromJSON.csv"), header = F) %>% 
     mutate(ORIGIN = FOLDER) %>% 
     setnames(old = c("V1",    "V2",     "V3",    "V4",   "V5",   "V6",   "V7",   "V8",     "V9",  "V10",  "V11",        "V12",          "V13"), 
              new = c("FILE", "MODEL", "RECYCLE", "TOL", "pLDDT", "pTM", "piTM", "iScore", "iRes", "iCnt", "FILE_MODEL", "NUM_CLUSTERS", "N_MONOMERS"), 
              skip_absent = T) 
   # ADD RANK COLUMN
   JE <- JSON_EXTRACT %>% 
-    mutate(FILE_RECYCLE = paste0(FILE_MODEL, "_", RECYCLE), RANK = NA)   %>% distinct(FILE_RECYCLE, .keep_all = T) %>% 
-    group_by(FILE_MODEL) %>% mutate(RANK = frank(desc(iScore), ties.method = "max")) %>% 
-    distinct(FILE_MODEL, .keep_all = T)
+    mutate(FILE_RECYCLE = paste0(FILE_MODEL, "_", RECYCLE), RANK = NA) %>% 
+    distinct(FILE_RECYCLE, .keep_all = T) %>% 
+    group_by(FILE) %>% 
+    mutate(RANK = frank(desc(iScore), ties.method = "max"))
   # SAVE CSV FILE
-  write.csv(JE, paste0(CSV_LOC, "df_", FOLDER,"_fromJSON.csv"), row.names = F)
+  #write.csv(JE, paste0(FILES_LOC, "df_", FOLDER,"_fromJSON.csv"), row.names = F)
+  write.csv(JE, paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"), row.names = F)
 }
 
+# USE BIG ANNOTATION FILES (CONTAIN ALL SIGNIFICANT PROTEINS THAT CAME DOWN WITH MYD88, IRAK4, IRAK1 RESPECTIVELY)
 if (ANNOTATE == T) {
-  
-  if (file.exists(paste0(CSV_LOC, "df_", FOLDER,".csv"))) {
-    MAIN <- read.csv(paste0(CSV_LOC, "df_", FOLDER,".csv")) %>% remove_empty("cols") %>% filter(RANK == 1)
+  if (file.exists(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv")) == T) {
+    system(command = paste0(" [ -f ", FILES_LOC, "ANNOTATED/", FOLDER ,"_fromJSON_ANNOTATED.csv ] && rm ", FILES_LOC, "ANNOTATED/", FOLDER ,"_fromJSON_ANNOTATED.csv"))
+    MAIN  <- fread(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv")) %>% remove_empty("cols") %>% filter(RANK == 1)
+  } else if (file.exists(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv")) == T) {
+    system(command = paste0(" [ -f ", FILES_LOC, "ANNOTATED/", FOLDER ,"_ANNOTATED.csv ] && rm ", FILES_LOC, "ANNOTATED/", FOLDER ,"_ANNOTATED.csv"))
+    MAIN  <- fread(paste0((paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv")))) %>% remove_empty("cols") %>% filter(RANK == 1)
+  } else print("Please make sure either processed JSON or processed SLURMs exist in the designated folder..")
     
-    # get accession numnbers (if applicable)
     Entry <- unlist(lapply(strsplit(MAIN$FILE, "_", fixed=TRUE), function(x) return(x[2])))
-    
-    # bind to Main df
     MAIN  <- cbind(MAIN, Entry)
     
-    #Get Taxonomy Information, names that are not accession numbers are automatically excluded with the warning:
-    # "Bad request. The resource you requested doesn't exist or There is a problem with your input."
-    TaxaObj <- GetNamesTaxa(MAIN$Entry) 
+    if (file.exists(paste0(FILES_LOC, "TAXA_INFO/", FOLDER,"_TAXA.csv")) == T) {
+      TAXA <- fread(paste0(FILES_LOC, "TAXA_INFO/", FOLDER,"_TAXA.csv"))
+    } else {
+      TAXA  <- GetNamesTaxa(ProteinAccList = MAIN$Entry)
+    }
     
-    # join TaxaObj with MAIN to create annotated df
-    if (length(TaxaObj) != 0) {
-      ANNOTATED <- full_join(MAIN, TaxaObj) %>% mutate(Entry.Name = case_when(!is.na(Entry.Name) ~ Entry.Name, is.na(Entry.Name) ~ FILE))
-      # remove unnecessary columns
-      ANNOTATED <- ANNOTATED %>% select(-c(FILE_MODEL, ORIGIN, FILE_N, inv.RANK, VIS, Entry, Virus.hosts, Gene.Names..ordered.locus., Gene.Names..ORF.))
-    } else ANNOTATED <- MAIN %>% select(-c(FILE_MODEL, ORIGIN, FILE_N, inv.RANK, VIS))
-    # write Annotated df to file
-    write.csv(ANNOTATED, paste0(CSV_LOC, "df_", FOLDER,"_ANNOTATED.csv"), row.names = F)
-  }
-  
-  if (file.exists(paste0(CSV_LOC, "df_", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(CSV_LOC, "df_", FOLDER,"_fromJSON.csv")) %>% remove_empty("cols") %>% distinct(FILE, .keep_all = T)
+    ANNOTATED <- left_join(MAIN, TAXA) %>% select(-c(FILE_MODEL, ORIGIN, Entry, Virus.hosts, Gene.Names..ordered.locus., Gene.Names..ORF.))
     
-    # get accession numnbers (if applicable)
-    Entry <- unlist(lapply(strsplit(MAIN$FILE, "_", fixed=TRUE), function(x) return(x[2])))
+    if (file.exists(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv")) == T) {
+      write.csv(ANNOTATED, paste0(FILES_LOC, "ANNOTATED/", FOLDER ,"_fromJSON_ANNOTATED.csv"))
+    } else if (file.exists(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv")) == T) {
+      write.csv(ANNOTATED, paste0(FILES_LOC, "ANNOTATED/", FOLDER ,"_ANNOTATED.csv"))
+    } else print("Could not annotate.")
     
-    # bind to Main df
-    MAIN  <- cbind(MAIN, Entry)
-    
-    #Get Taxonomy Information, names that are not accession numbers are automatically excluded with the warning:
-    # "Bad request. The resource you requested doesn't exist or There is a problem with your input."
-    TaxaObj <- GetNamesTaxa(MAIN$Entry) 
-    
-    # join TaxaObj with MAIN to create annotated df
-    if (length(TaxaObj) != 0) {
-      ANNOTATED <- full_join(MAIN, TaxaObj) %>% mutate(Entry.Name = case_when(!is.na(Entry.Name) ~ Entry.Name, is.na(Entry.Name) ~ FILE))
-      # remove unnecessary columns
-      ANNOTATED <- ANNOTATED %>% select(-c(FILE_MODEL, ORIGIN, FILE_N, inv.RANK, Entry, Virus.hosts, Gene.Names..ordered.locus., Gene.Names..ORF.))
-    } else ANNOTATED <- MAIN %>% select(-c(FILE_MODEL, ORIGIN, FILE_N, inv.RANK, VIS))
-    # SAVE ANNOTATED CSV FILE
-    write.csv(ANNOTATED, paste0(CSV_LOC, "df_", FOLDER,"_ANNOTATED.csv"), row.names = F)
-  }
-  
-  
-}
+} else print("Please check whether processed slurm or JSON files exist in respective folders.")
+
+
 
 
