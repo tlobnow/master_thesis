@@ -1,3 +1,10 @@
+#         .
+#       ":"
+#     ___:____     |"\/"|
+#   ,'        `.    \  /
+#   |  O        \___/  |
+# ~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^
+
 # READING, MANIPULATION AND PREPARATION OF IP-MS DATA
 
 # LOAD LIBRARIES
@@ -6,14 +13,13 @@ library(data.table)
 library(readxl)
 
 # LOAD FUNCTIONS
-source("https://raw.githubusercontent.com/tlobnow/master_thesis/main/functions.R")
+source("https://raw.githubusercontent.com/tlobnow/master_thesis/main/scripts/functions.R")
 
-FOLDER_PATH  = "/Volumes/TAYLOR-LAB/Fenja/Mass Spec/Mass Spec analysis/IL-1 proteomics/lists to take a look at/MyD88_IRAK4_IRAK1-IPs/"
-FOLDER_PATH2 = "/Volumes/TAYLOR-LAB/Fenja/Mass Spec/Mass Spec analysis/IL-1 proteomics/lists to take a look at/KO_IRAK4: IRAK1 MyD88-IPs/"
-FOLDER_PATH_local = "~/Documents/Github/master_thesis/raw_xlsx/"
-OUT_local = "~/Documents/Github/master_thesis/IP_MS_DF/"
-
-DATA_TAY_CONNECTION <- file.exists("/Volumes/TAYLOR-LAB")
+FOLDER_PATH         = "/Volumes/TAYLOR-LAB/Fenja/Mass Spec/Mass Spec analysis/IL-1 proteomics/lists to take a look at/MyD88_IRAK4_IRAK1-IPs/"
+FOLDER_PATH2        = "/Volumes/TAYLOR-LAB/Fenja/Mass Spec/Mass Spec analysis/IL-1 proteomics/lists to take a look at/KO_IRAK4: IRAK1 MyD88-IPs/"
+FOLDER_PATH_local   = "~/Documents/Github/master_thesis/raw_xlsx/"
+OUT_local           = "~/Documents/Github/master_thesis/raw_csv/"
+DATA_TAY_CONNECTION = file.exists("/Volumes/TAYLOR-LAB")
 
 READ_RAW         = T
 SIGNIF_ONLY      = T

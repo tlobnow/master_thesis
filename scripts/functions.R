@@ -113,7 +113,7 @@ slurmExtract <- function(SLURM, OUT) {
   EXTRACT$MODEL <- unlist(lapply(strsplit(EXTRACT$MODEL, "_multimer", fixed=TRUE), function(x) return(x[1])))
   EXTRACT       <- unique(EXTRACT)
   
-  write.table(EXTRACT, file = paste0(OUT ,".csv"),sep = ",", append = T, quote = F, row.names = F, col.names = F)
+  write.table(EXTRACT, file = paste0(OUT ,"_fromSLURM.csv"),sep = ",", append = T, quote = F, row.names = F, col.names = F)
 }
 
 

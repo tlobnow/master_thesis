@@ -1,7 +1,7 @@
 ---
 title: "IP_MS_ANALYSIS"
 author: "Finn"
-date: ", Last edited on `r format(Sys.time(), '%d %B %Y')`"
+date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_document
 ---
 
@@ -43,24 +43,30 @@ OUT    = paste0(FILES_LOC, FOLDER)
 
 ``` {r}
 if (ANNOTATE == T) {
-  if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))
-  } else if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))
+  if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))
+  } else if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))
   } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
 } else {
-  MAIN <- fread(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
-  if (file.exists(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
+  MAIN <- fread(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
+  if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
     MAIN$RECYCLE_num <-unlist(lapply(strsplit(MAIN$RECYCLE, "_", fixed=TRUE), function(x) return(x[2])))
-  } else if (file.exists(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))
+  } else if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM_.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM_.csv"))
   } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
 }
 
+MAIN$FILE[ MAIN$FILE %in% "MYD88_MYD88_x1"] <- 'MYD88_DD_x6_IRAK4_DD_x4_IRAK1_DD_x4'
+
+MAIN <- MAIN %>% mutate(CONTROL = case_when(is.na(Entry.Name) ~ T,
+                                            !is.na(Entry.Name) ~ F))
+
+
 ## HISTOGRAM
   MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 
-    ggplot(aes(iScore, fill = as.factor(N_MONOMERS))) +
+    ggplot(aes(iScore, fill = CONTROL)) +
     geom_vline(xintercept = 0.4, col = "gray40", linetype = "dotted", linewidth = 1) +
     geom_vline(xintercept = 0.5, col = "cornflowerblue", linetype = "dotted", linewidth = 1) +
     geom_vline(xintercept = 0.7, col = "lightgreen", linetype = "dotted", linewidth = 1) +
@@ -82,7 +88,7 @@ if (ANNOTATE == T) {
   max_SIGNIF_PROTEINS <- SIGNIF_PROTEINS %>% group_by(FILE) %>% summarise(iScore = max(iScore))
   
   MAIN_PLOT <- MAIN %>% ggplot(aes(iScore, piTM, 
-                      col = as.factor(N_MONOMERS),
+                      col = CONTROL,
                       label = Entry.Name)) +
     geom_abline(col = "gray") +
     geom_point(size = 3) +
@@ -112,18 +118,18 @@ OUT    = paste0(FILES_LOC, FOLDER)
 
 ``` {r}
 if (ANNOTATE == T) {
-  if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))
-  } else if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))
+  if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))
+  } else if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))
   } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
 } else {
-  MAIN <- fread(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
-  if (file.exists(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
+  MAIN <- fread(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
+  if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
     MAIN$RECYCLE_num <-unlist(lapply(strsplit(MAIN$RECYCLE, "_", fixed=TRUE), function(x) return(x[2])))
-  } else if (file.exists(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))
+  } else if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))
   } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
 }
 
@@ -179,18 +185,18 @@ OUT    = paste0(FILES_LOC, FOLDER)
 
 ``` {r}
 if (ANNOTATE == T) {
-  if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))
-  } else if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))
+  if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))
+  } else if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))
   } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
 } else {
-  MAIN <- fread(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
-  if (file.exists(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
+  MAIN <- fread(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
+  if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
     MAIN$RECYCLE_num <-unlist(lapply(strsplit(MAIN$RECYCLE, "_", fixed=TRUE), function(x) return(x[2])))
-  } else if (file.exists(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))
+  } else if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))) {
+    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))
   } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
 }
 

@@ -25,24 +25,24 @@ MAIN    = ifelse(dir.exists("/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/"),
 #MAIN = "/Volumes/TAYLOR-LAB/Finn/RESULTS/"
 
 FOLDER  = "MYD88"
-FOLDER  = "IRAK4"
+#FOLDER  = "IRAK4"
 FOLDER  = "IRAK1"
 
 ### DEFINE PATHS
-FILES_LOC  = "~/Documents/Github/master_thesis/"
-OUT      = paste0(FILES_LOC, FOLDER)
-ANNOTATE = T
+FILES_LOC      = "~/Documents/Github/master_thesis/"
+SUMMARIES_PATH = paste0(FILES_LOC, "summaries/")
+ANNOTATED_PATH = paste0(FILES_LOC, "summaries_annotated/")  # added taxa info
+OUT            = paste0(FILES_LOC, FOLDER)
 
-if (ANNOTATE == T) {
-  #MAIN1 <- fread(paste0(FILES_LOC, "df_", FOLDER,"_ANNOTATED.csv"))
-  #MAIN2 <- fread(paste0(FILES_LOC, "df_BACKUP_SLURMS_1_ANNOTATED.csv"))
-  #MAIN <- full_join(MAIN1, MAIN2) 
-  if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_fromJSON_ANNOTATED.csv"))
-  } else if (file.exists(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "ANNOTATED/", FOLDER,"_ANNOTATED.csv"))
-  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
+ANNOTATED = T
+
+if (ANNOTATED == T) {
   
+  if (file.exists(paste0(ANNOTATED_PATH, FOLDER,"_fromJSON_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(ANNOTATED_PATH, FOLDER,"_fromJSON_ANNOTATED.csv"))
+  } else if (file.exists(paste0(ANNOTATED_PATH, FOLDER,"_fromSLURM_ANNOTATED.csv"))) {
+    MAIN <- read.csv(paste0(ANNOTATED_PATH, FOLDER,"_fromSLURM_ANNOTATED.csv"))
+  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
   
   CONTROL_SAMPLES <- MAIN %>% filter(FILE %in% c("TNFa_MOUSE_x6",
                                                  "MYD88-DD_x10",
@@ -72,7 +72,7 @@ if (ANNOTATE == T) {
   max_SIGNIF_PROTEINS <- SIGNIF_PROTEINS %>% group_by(FILE) %>% summarise(iScore = max(iScore))
   
   MAIN_PLOT <- MAIN %>% ggplot(aes(iScore, piTM, 
-                      col = as.factor(N_MONOMERS),
+                      #col = as.factor(N_MONOMERS),
                       label = Entry.Name)) +
     geom_abline(col = "gray") +
     geom_point(size = 3) +
@@ -94,21 +94,18 @@ if (ANNOTATE == T) {
   
   MAIN_PLOT
   
-  ggplotly(MAIN_PLOT)
+  #ggplotly(MAIN_PLOT)
   
   
   
 } else {
-  #MAIN1 <- fread(paste0(FILES_LOC, "df_", FOLDER,"_fromJSON.csv"))
-  #MAIN2 <- fread(paste0(FILES_LOC, "df_", FOLDER,".csv"))
-  #MAIN <- full_join(MAIN1, MAIN2)               
-  #MAIN <- fread(paste0(FILES_LOC, "df_", FOLDER,"_fromJSON.csv"))
-  MAIN <- fread(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
-  if (file.exists(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "JSON_PROCESSED/", FOLDER,"_fromJSON.csv"))
+  
+  MAIN <- fread(paste0(SUMMARIES_PATH, FOLDER,"_fromJSON.csv"))
+  if (file.exists(paste0(SUMMARIES_PATH, FOLDER,"_fromJSON.csv"))) {
+    MAIN <- read.csv(paste0(SUMMARIES_PATH, FOLDER,"_fromJSON.csv"))
     MAIN$RECYCLE_num <-unlist(lapply(strsplit(MAIN$RECYCLE, "_", fixed=TRUE), function(x) return(x[2])))
-  } else if (file.exists(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "SLURM_PROCESSED/", FOLDER,".csv"))
+  } else if (file.exists(paste0(SUMMARIES_PATH, FOLDER,"_fromSLURM.csv"))) {
+    MAIN <- read.csv(paste0(SUMMARIES_PATH, FOLDER,"_fromSLURM.csv"))
   } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
   
   
