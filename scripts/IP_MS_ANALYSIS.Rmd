@@ -5,8 +5,6 @@ date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_document
 ---
 
-### MYD88
-
 ``` {r, warning = FALSE, message = FALSE, echo = FALSE}
 library(tidyverse)
 library(data.table)
@@ -33,11 +31,83 @@ MAIN    = ifelse(dir.exists("/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/"),
 FILES_LOC  = "~/Documents/Github/master_thesis/"
 ANNOTATE = T
 
+TIME_CHECK = read.csv(paste0(FILES_LOC, "summaries/TIME_CHECK.csv")) %>% mutate(BAIT = paste(PULLED_PROTEIN, "KO", KO, sep = "_"))
+
+```
+
+### FENJA'S IP-MS DATA
+
+The goal of the IP-MS analysis was to identify interactors of MyD88, IRAK4 and IRAK1 across different IL-1β stimulation time points, and how these interactions differ from those in unstimulated cells. Quantitative data were normalized to allow sensitive detection of proteins interacting with the respective bait proteins (i.e. MyD88, IRAK4 and IRAK1) upon IL-1β stimulation. 
+Protein abundances within each set (i.e., all samples corresponding to the same bait) were corrected by applying a scaling factor that normalizes the abundances of the bait proteins to their corresponding global mean. As a consequence, bait protein abundances are identical across conditions, enabling calculation of enrichment factors for interacting proteins in stimulated versus unstimulated control samples.
+
+To obtain an IL-1β dependent-myddosome interactome, Fenja was exclusively interested in  proteins enriched in the stimulated conditions (Fig. 7, right side of all scatter plots). She classified proteins as significantly enriched if they met the following criteria: 
+  a) at least two-fold higher abundance after IL-1β stimulation (> 1 on the log2 scale), 
+  b) a -log10 p- value larger than 2 (Fig. 7, y-axis)
+  c) a false-discovery rate (FDR) of ≤ 0.05
+  
+Using these criteria, the following proteins were identified as significantly enriched upon stimulation:
+
+### MYD88
+
+Significant proteins pulled down with MyD88:
+  - 15 min: 72
+  - 30 min: 379
+  - 60 min: 288
+Significant proteins pulled down with IRAK4:
+  - 15 min: 193
+  - 30 min: 240
+  - 60 min: 68
+Significant proteins pulled down with IRAK1:
+  - 15 min: 0
+  - 30 min: 31
+  - 60 min: 4
+  
+
+#### HOW MANY PROTEINS WERE PULLED DOWN PER BAIT PROTEIN (REGARDLESS OF SIGNIFICANCE)
+
+``` {r}
+TIME_CHECK %>% 
+  count(SIGNIF_CLASS, PULLED_PROTEIN, ORIGIN) %>% 
+  arrange(desc(PULLED_PROTEIN)) %>% 
+  kable(caption = "Unfiltered pulled proteins faceted by IP-Protein and Significance Level")
+
+TIME_CHECK %>% 
+  ggplot(aes(PULLED_PROTEIN, fill=PULLED_PROTEIN, col = KO, alpha = 0.1)) + 
+  geom_bar() + 
+  facet_grid(SIGNIF_CLASS~as.factor(ORIGIN), scales = "free_y") +
+  ggtitle("Number of proteins pulled by IP-Protein and Significance Level (unfiltered)")
+```
+
+
+### 
+``` {r}
+# SUBSET THE TIME_CHECK MAIN DATAFRAME BY FENJA's SIGNIFICANCE FILTERS
+FENJA_SIGNIF_FILTERED <- TIME_CHECK %>% 
+  filter((X.LOG.P.value. > 2) & (Difference > 1) & Significant == T & KO == "NONE", SIGNIF_CLASS == "SIGNIFICANT")
+
+
+FENJA_SIGNIF_FILTERED %>%
+  ggplot(aes(PULLED_PROTEIN, fill=PULLED_PROTEIN)) +
+  geom_bar() +
+  facet_grid(~as.factor(ORIGIN), scales = "free_y") +
+  theme(legend.position = "none")
+
+# HOW FENJA FILTERED THE PROTEINS
+MYD88.cnt <- FENJA_SIGNIF_FILTERED %>% filter(PULLED_PROTEIN == "MYD88") %>% group_by(ORIGIN) %>% count()
+kable(MYD88.cnt, caption = "Proteins pulled down with MyD88 per time point")
+
+IRAK4.cnt <- FENJA_SIGNIF_FILTERED %>% filter(PULLED_PROTEIN == "IRAK4") %>% group_by(ORIGIN) %>% count()
+kable(IRAK4.cnt, caption = "Proteins pulled down with IRAK4 per time point")
+
+IRAK1.cnt <- FENJA_SIGNIF_FILTERED %>% filter(PULLED_PROTEIN == "IRAK1") %>% group_by(ORIGIN) %>% count()
+kable(IRAK1.cnt, caption = "Proteins pulled down with IRAK1 per time point")
+
+
 ```
 
 
 ``` {r}
-FOLDER = "MYD88"
+FOLDER = "MYD88_signif"
 OUT    = paste0(FILES_LOC, FOLDER)
 ```
 
@@ -60,9 +130,9 @@ if (ANNOTATE == T) {
 
 MAIN$FILE[ MAIN$FILE %in% "MYD88_MYD88_x1"] <- 'MYD88_DD_x6_IRAK4_DD_x4_IRAK1_DD_x4'
 
-MAIN <- MAIN %>% mutate(CONTROL = case_when(is.na(Entry.Name) ~ T,
+MAIN <- MAIN %>% mutate(CONTROL = case_when(FILE %in% c("MYD88_DD_x6_IRAK4_DD_x4_IRAK1_DD_x4", "MYD88_IL1R_x1") | 
+                                              Entry.Name %in% c("IRAK1_MOUSE", "IRAK4_MOUSE") ~ T,
                                             !is.na(Entry.Name) ~ F))
-
 
 ## HISTOGRAM
   MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 
@@ -87,6 +157,18 @@ MAIN <- MAIN %>% mutate(CONTROL = case_when(is.na(Entry.Name) ~ T,
                                                  is.na(Entry.Name) ~ FILE))
   max_SIGNIF_PROTEINS <- SIGNIF_PROTEINS %>% group_by(FILE) %>% summarise(iScore = max(iScore))
   
+  signif_proteins_fil <- TIME_CHECK %>% 
+    filter(Protein.IDs %in% SIGNIF_PROTEINS$V1) %>% 
+    arrange(Protein.IDs)
+  
+  
+  kable(signif_proteins_fil)
+  
+  
+```
+
+
+``` {r}
   MAIN_PLOT <- MAIN %>% ggplot(aes(iScore, piTM, 
                       col = CONTROL,
                       label = Entry.Name)) +
@@ -96,7 +178,7 @@ MAIN <- MAIN %>% mutate(CONTROL = case_when(is.na(Entry.Name) ~ T,
     scale_x_continuous(name = "iScore", breaks = c(0, 0.4, 0.5, 0.7, 1)) +
     scale_y_continuous(name = "piTM", breaks = c(0, 0.5, 1)) +
     theme(legend.position = "bottom") +
-    scale_color_discrete(name = "Complex Size") +
+    scale_color_discrete(name = "Control") +
     ggtitle(paste0('Computational screening for PPI partners of ', FOLDER)) +
     expand_limits(x=c(0,1), y=c(0,1)) +
     annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
@@ -242,4 +324,8 @@ if (ANNOTATE == T) {
   #MAIN_PLOT
   ggplotly(MAIN_PLOT)
 ```
+
+
+
+
 

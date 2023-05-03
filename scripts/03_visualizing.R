@@ -1,9 +1,10 @@
-#         .
-#       ":"
-#     ___:____     |"\/"|
-#   ,'        `.    \  /
-#   |  O        \___/  |
-# ~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^
+#          .                                                   ####  ##        #
+#       ":"                               ####              ###########        #
+#     ___:____     |"\/"|               ########              #######          #
+#   ,'        `.    \  /                  #####                                #
+#   |  O        \___/  |                                                       #
+# ~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~#
+
 library(tidyverse)
 library(data.table)
 library(janitor)
@@ -24,9 +25,9 @@ MAIN    = ifelse(dir.exists("/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/"),
 #MAIN    = "~/Documents/Github/transferGit/"
 #MAIN = "/Volumes/TAYLOR-LAB/Finn/RESULTS/"
 
-FOLDER  = "MYD88"
+FOLDER  = "MYD88_signif"
 #FOLDER  = "IRAK4"
-FOLDER  = "IRAK1"
+#FOLDER  = "IRAK1"
 
 ### DEFINE PATHS
 FILES_LOC      = "~/Documents/Github/master_thesis/"
