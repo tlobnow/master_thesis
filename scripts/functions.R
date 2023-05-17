@@ -43,14 +43,16 @@ retrieveAccessionIDs <- function(DF,OUT="retrievedAccessionIDs.txt") {
 #######################################################################################################################
 #######################################################################################################################
 
-jsonExtract_1.1_ratio <- function(JSON, OUT) {
+
+jsonExtract <- function(JSON, OUT, FILE) {
   # REMOVE ALL "INFINITY" STRINGS IN YOUR JSON FILES USING:
   # grep -rl Infinity . | xargs sed -i 's/Infinity/9999/g'
   json <- fromJSON(JSON)
   # EXTRACT FILE
-  FILE_A  <- unlist(lapply(strsplit(json[["chains"]][["A"]], "_", fixed=TRUE), function(x) return(x[1])))
-  FILE_B  <- unlist(lapply(strsplit(json[["chains"]][["B"]], "_", fixed=TRUE), function(x) return(x[1])))
-  FILE    <- paste(FILE_A, FILE_B, "x1", sep = "_")
+  #FILE_A  <- unlist(lapply(strsplit(json[["chains"]][["A"]], "_", fixed=TRUE), function(x) return(x[1])))
+  #FILE_B  <- unlist(lapply(strsplit(json[["chains"]][["B"]], "_", fixed=TRUE), function(x) return(x[1])))
+  #FILE    <- paste(FILE_A, FILE_B, "x1", sep = "_")
+  FILE    <- FILE
   MODEL   <- unlist(lapply(strsplit(as.data.frame(json$order)[1,], "_", fixed=TRUE), function(x) return(x[2])))
   TOL     <- as.data.frame(json$tol_values) %>% pivot_longer(names_to = "RECYCLE", values_to = "TOL", cols = 1:ncol(.))
   pLDDT   <- as.data.frame(json$plddts) %>% pivot_longer(names_to = "RECYCLE", values_to = "pLDDT", cols = 1:ncol(.))
