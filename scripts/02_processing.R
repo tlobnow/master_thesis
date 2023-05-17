@@ -54,11 +54,10 @@ MAIN    = ifelse(dir.exists("/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/"),
                  yes =  "/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/",
                  no  =  "~/Documents/Github/transferGit/")
 
-# FOLDER  = "MYD88"
+FOLDER  = "MYD88"
 # FOLDER  = "IRAK4"
 # FOLDER  = "IRAK1"
-FOLDER  = "MYD88_signif"
-
+# FOLDER  = "MYD88_signif"
 
 
 FILES_LOC          = "~/Documents/Github/master_thesis/"
@@ -81,7 +80,7 @@ if (JSON_XTRCT == T) {
 
   LOCATION = paste0(MAIN, FOLDER)
   LIST = list.files(LOCATION)
-
+  
   for (FILE in LIST) {
     print(paste0("processing ", FILE))
     maxJSON=list.files(paste0(LOCATION, "/" , FILE, "/JSON/"))
@@ -91,9 +90,9 @@ if (JSON_XTRCT == T) {
     
     if (length(maxJSON) > 0) {
       for (i in 1:length(maxJSON)) {
-        JSON  = paste0(LOCATION, "/" , FILE, "/JSON/", maxJSON[i])
-        OUT   = paste0(RAW_SUMMARIES_PATH, FOLDER)
-        jsonExtract_1.1_ratio(JSON = JSON, OUT = OUT)
+        JSON   = paste0(LOCATION, "/" , FILE, "/JSON/", maxJSON[i])
+        OUT    = paste0(RAW_SUMMARIES_PATH, FOLDER)
+        jsonExtract(JSON = JSON, OUT = OUT, FILE = FILE)
       } 
     } else {
       next

@@ -31,7 +31,12 @@ MAIN    = ifelse(dir.exists("/Volumes/TAYLOR-LAB/Finn/RESULTS/IP_MS_2/"),
 FILES_LOC  = "~/Documents/Github/master_thesis/"
 ANNOTATE = T
 
-TIME_CHECK = read.csv(paste0(FILES_LOC, "summaries/TIME_CHECK.csv")) %>% mutate(BAIT = paste(PULLED_PROTEIN, "KO", KO, sep = "_"))
+TIME_CHECK = read.csv(paste0(FILES_LOC, "summaries/TIME_CHECK.csv")) %>% 
+  mutate(BAIT = case_when(KO == "NONE" ~ PULLED_PROTEIN,                                     
+                          KO != "NONE" ~ paste(PULLED_PROTEIN, "KO", KO, sep = " ")),
+         #SIGNIF_CLASS = case_when(!is.na(SIGNIF_CLASS) ~ SIGNIF_CLASS, is.na(SIGNIF_CLASS) ~ "ns")
+         )
+TIME_CHECK$ORIGIN <- as.factor(TIME_CHECK$ORIGIN)
 
 ```
 
@@ -66,25 +71,38 @@ Significant proteins pulled down with IRAK1:
 #### HOW MANY PROTEINS WERE PULLED DOWN PER BAIT PROTEIN (REGARDLESS OF SIGNIFICANCE)
 
 ``` {r}
+# TABLE 1
 TIME_CHECK %>% 
   count(SIGNIF_CLASS, PULLED_PROTEIN, ORIGIN) %>% 
   arrange(desc(PULLED_PROTEIN)) %>% 
   kable(caption = "Unfiltered pulled proteins faceted by IP-Protein and Significance Level")
 
+# FIGURE 1
 TIME_CHECK %>% 
-  ggplot(aes(PULLED_PROTEIN, fill=PULLED_PROTEIN, col = KO, alpha = 0.1)) + 
-  geom_bar() + 
+  ggplot(aes(PULLED_PROTEIN, fill=PULLED_PROTEIN, col = KO)) + 
+  geom_bar(aes(alpha = 0.1)) + 
   facet_grid(SIGNIF_CLASS~as.factor(ORIGIN), scales = "free_y") +
+  labs(x = "IP-Protein (bait)", y = "proteins pulled per bait [n]") +
   ggtitle("Number of proteins pulled by IP-Protein and Significance Level (unfiltered)")
+
+# FIGURE 1 - faceted by BAIT
+TIME_CHECK %>% ggplot() + 
+  geom_bar(aes(BAIT, fill=BAIT)) + 
+  facet_grid(SIGNIF_CLASS~as.factor(ORIGIN), scales = "free_y") +
+  labs(x = "IP-Protein (bait)", y = "proteins pulled per bait [n]") +
+  ggtitle("Number of proteins pulled by IP-Protein and Significance Level (unfiltered)") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), legend.position = "bottom")
+
 ```
 
 
-### 
+### FENJA's FILTERS
+
 ``` {r}
 # SUBSET THE TIME_CHECK MAIN DATAFRAME BY FENJA's SIGNIFICANCE FILTERS
 FENJA_SIGNIF_FILTERED <- TIME_CHECK %>% 
-  filter((X.LOG.P.value. > 2) & (Difference > 1) & Significant == T & KO == "NONE", SIGNIF_CLASS == "SIGNIFICANT")
-
+  filter((X.LOG.P.value. > 2) & (Difference > 1) & (Significant == T) & (KO == "NONE"), 
+         SIGNIF_CLASS == "SIGNIFICANT")
 
 FENJA_SIGNIF_FILTERED %>%
   ggplot(aes(PULLED_PROTEIN, fill=PULLED_PROTEIN)) +
@@ -94,20 +112,56 @@ FENJA_SIGNIF_FILTERED %>%
 
 # HOW FENJA FILTERED THE PROTEINS
 MYD88.cnt <- FENJA_SIGNIF_FILTERED %>% filter(PULLED_PROTEIN == "MYD88") %>% group_by(ORIGIN) %>% count()
-kable(MYD88.cnt, caption = "Proteins pulled down with MyD88 per time point")
+kable(MYD88.cnt, caption = "Filtered Proteins pulled down with MyD88 per time point")
 
 IRAK4.cnt <- FENJA_SIGNIF_FILTERED %>% filter(PULLED_PROTEIN == "IRAK4") %>% group_by(ORIGIN) %>% count()
-kable(IRAK4.cnt, caption = "Proteins pulled down with IRAK4 per time point")
+kable(IRAK4.cnt, caption = "Filtered Proteins pulled down with IRAK4 per time point")
 
 IRAK1.cnt <- FENJA_SIGNIF_FILTERED %>% filter(PULLED_PROTEIN == "IRAK1") %>% group_by(ORIGIN) %>% count()
-kable(IRAK1.cnt, caption = "Proteins pulled down with IRAK1 per time point")
+kable(IRAK1.cnt, caption = "Filtered Proteins pulled down with IRAK1 per time point")
 
+```
+
+#### CHECK FOR CRAPOME
+
+- Fenja mentioned the problem of crapome proteins
+- coming down with almost every IP (e.g. 1433 proteins)
+- retrieve protein accession numbers from gene names
+
+``` {r}
+
+
+
+```
+
+#### Genes pulled with MyD88 that were also pulled with IRAK4 or IRAK1
+
+``` {r}
+COMMON <- as.data.frame(TIME_CHECK %>% filter(!is.na(Difference)) %>% select(BAIT, Protein.IDs) %>% group_by(Protein.IDs) %>% table())
+COMMON.fil <- COMMON %>% filter(Freq > 0) %>% pivot_wider(id_cols = 1:2, names_from = BAIT, values_from = BAIT) %>%
+  group_by(Protein.IDs) %>% fill(c(everything()), .direction = "downup") %>% ungroup() %>%  distinct(Protein.IDs, .keep_all = T) %>%
+  mutate(IRAK1.bool = case_when(is.na(IRAK1) ~ F, !is.na(IRAK1) ~ T),
+         IRAK4.bool = case_when(is.na(IRAK4) ~ F, !is.na(IRAK4) ~ T),
+         MYD88.bool = case_when(is.na(MYD88) ~ F, !is.na(MYD88) ~ T),
+         MYD88_KO_IRAK1.bool = case_when(is.na(`MYD88 KO IRAK1`) ~ F, !is.na(`MYD88 KO IRAK1`) ~ T),
+         MYD88_KO_IRAK4.bool = case_when(is.na(`MYD88 KO IRAK4`) ~ F, !is.na(`MYD88 KO IRAK4`) ~ T)) %>% 
+  select(-c(IRAK1, IRAK4, MYD88, `MYD88 KO IRAK4`, `MYD88 KO IRAK1`, Freq, ))
+
+COMMON.fil.sel <- COMMON.fil %>% filter(MYD88.bool == T & (IRAK1.bool == T | IRAK4.bool == T))
+
+```
+
+``` {r}
+TIME_CHECK %>% filter(Protein.IDs == "Q9Z321") %>%
+  ggplot(aes(ORIGIN, X.LOG.P.value., col = PULLED_PROTEIN, shape = BAIT)) +
+  geom_point() +
+  geom_line(aes(group = BAIT))
 
 ```
 
 
 ``` {r}
-FOLDER = "MYD88_signif"
+FOLDER = "MYD88"
 OUT    = paste0(FILES_LOC, FOLDER)
 ```
 
@@ -132,10 +186,13 @@ MAIN$FILE[ MAIN$FILE %in% "MYD88_MYD88_x1"] <- 'MYD88_DD_x6_IRAK4_DD_x4_IRAK1_DD
 
 MAIN <- MAIN %>% mutate(CONTROL = case_when(FILE %in% c("MYD88_DD_x6_IRAK4_DD_x4_IRAK1_DD_x4", "MYD88_IL1R_x1") | 
                                               Entry.Name %in% c("IRAK1_MOUSE", "IRAK4_MOUSE") ~ T,
-                                            !is.na(Entry.Name) ~ F))
+                                            !is.na(Entry.Name) ~ F),
+                        Protein.IDs = V1) %>% select(-V1)
+
+MAIN_HIGHEST_iSCORES <- MAIN %>% group_by(FILE) %>% filter(iScore == max(iScore))
 
 ## HISTOGRAM
-  MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 
+  MAIN_HIGHEST_iSCORES %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 
     ggplot(aes(iScore, fill = CONTROL)) +
     geom_vline(xintercept = 0.4, col = "gray40", linetype = "dotted", linewidth = 1) +
     geom_vline(xintercept = 0.5, col = "cornflowerblue", linetype = "dotted", linewidth = 1) +
@@ -149,41 +206,69 @@ MAIN <- MAIN %>% mutate(CONTROL = case_when(FILE %in% c("MYD88_DD_x6_IRAK4_DD_x4
 ```
 
 ``` {r}
-## iScore vs. piTM plot
-  SIGNIF_PROTEINS <- MAIN %>% filter(iScore >= 0.4, !is.na(Gene.Names)) %>% distinct(FILE, .keep_all = T)
-  MAIN <- MAIN %>% mutate(SIGNIF = case_when(MAIN$FILE %in% SIGNIF_PROTEINS$FILE  ~ T,
-                                             !MAIN$FILE %in% SIGNIF_PROTEINS$FILE ~ F),
+## iScore vs. piTM plot prep
+SIGNIF_BY_iSCORE <- MAIN %>% filter(iScore >= 0.4, !is.na(Gene.Names)) %>% distinct(FILE, .keep_all = T)
+MAIN <- MAIN %>% mutate(SIGNIF_BY_iSCORE = case_when(MAIN$FILE %in% SIGNIF_BY_iSCORE$FILE  ~ T,
+                                                       !MAIN$FILE %in% SIGNIF_BY_iSCORE$FILE ~ F),
                           Entry.Name = case_when(!is.na(Entry.Name) ~ Entry.Name,
                                                  is.na(Entry.Name) ~ FILE))
-  max_SIGNIF_PROTEINS <- SIGNIF_PROTEINS %>% group_by(FILE) %>% summarise(iScore = max(iScore))
+                  ### FIX FOR LEFT_JOIN()    
   
-  signif_proteins_fil <- TIME_CHECK %>% 
-    filter(Protein.IDs %in% SIGNIF_PROTEINS$V1) %>% 
-    arrange(Protein.IDs)
+  #max_SIGNIF_BY_iSCORE <- SIGNIF_BY_iSCORE %>% group_by(FILE) %>% summarise(iScore = max(iScore))
   
+SIGNIF_BY_iSCORE_fil <- TIME_CHECK %>% filter(Protein.IDs %in% SIGNIF_BY_iSCORE$Protein.IDs) %>% arrange(Protein.IDs)
+MAIN_TIME_CHECK_fil  <- TIME_CHECK %>% filter(Protein.IDs %in% MAIN$Protein.IDs) %>% arrange(Protein.IDs)  
+
+#SIGNIF_BY_iSCORE_fil %>% filter(!is.na(SIGNIF_CLASS))
+#kable(SIGNIF_BY_iSCORE_fil)
+
   
-  kable(signif_proteins_fil)
+joined.SIGNIF_BY_iSCORE.TIME_CHECK <- left_join(SIGNIF_BY_iSCORE, SIGNIF_BY_iSCORE_fil, by = "Protein.IDs") %>% 
+  filter(PULLED_PROTEIN == FOLDER, !is.na(Difference))
+
+# joined.MAIN <- left_join(MAIN, MAIN_TIME_CHECK_fil, by = "Protein.IDs")  %>% 
+#   filter(PULLED_PROTEIN == FOLDER, !is.na(Difference))
+
+plt.joined.SIGNIF_BY_iSCORE.TIME_CHECK <- joined.SIGNIF_BY_iSCORE.TIME_CHECK %>% 
+  group_by(Protein.IDs) %>%
+  ggplot(aes(iScore, piTM, col = ORIGIN, label = Entry.Name)) +
+  geom_abline(col = "gray") +
+  geom_point(size = 3) +
+  scale_x_continuous(name = "iScore", breaks = c(0, 0.4, 0.5, 0.7, 1)) +
+  scale_y_continuous(name = "piTM", breaks = c(0, 0.5, 1)) +
+  theme(legend.position = "bottom") +
+  ggtitle(paste0('Computational screening for PPI partners of ', FOLDER)) +
+  expand_limits(x=c(0,1), y=c(0,1)) +
+  annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
+  annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
+  annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence")
+  
+  #MAIN_PLOT
+  ggplotly(plt.joined.SIGNIF_BY_iSCORE.TIME_CHECK)
   
   
 ```
 
+To create figure XXX, the JSON files of each run were extracted, iScores were grouped by file and highest iScores are plotted. If multiple runs (different seeds) were performed per protein, the 
+
+
 
 ``` {r}
-  MAIN_PLOT <- MAIN %>% ggplot(aes(iScore, piTM, 
-                      col = CONTROL,
-                      label = Entry.Name)) +
-    geom_abline(col = "gray") +
-    geom_point(size = 3) +
-    ggrepel::geom_label_repel(data = MAIN, show.legend = F) +
-    scale_x_continuous(name = "iScore", breaks = c(0, 0.4, 0.5, 0.7, 1)) +
-    scale_y_continuous(name = "piTM", breaks = c(0, 0.5, 1)) +
-    theme(legend.position = "bottom") +
-    scale_color_discrete(name = "Control") +
-    ggtitle(paste0('Computational screening for PPI partners of ', FOLDER)) +
-    expand_limits(x=c(0,1), y=c(0,1)) +
-    annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
-    annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
-    annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence")
+MAIN_PLOT <- MAIN %>% group_by(Protein.IDs) %>%
+  ggplot(aes(iScore, piTM, col = CONTROL, label = Entry.Name)) +
+  geom_abline(col = "gray") +
+  geom_point(size = 3) +
+  #geom_line(aes(group = Protein.IDs), col = "gray40") +
+  ggrepel::geom_label_repel(data = MAIN, show.legend = F) +
+  scale_x_continuous(name = "iScore", breaks = c(0, 0.4, 0.5, 0.7, 1)) +
+  scale_y_continuous(name = "piTM", breaks = c(0, 0.5, 1)) +
+  theme(legend.position = "bottom") +
+  scale_color_discrete(name = "Control") +
+  ggtitle(paste0('Computational screening for PPI partners of ', FOLDER)) +
+  expand_limits(x=c(0,1), y=c(0,1)) +
+  annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
+  annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
+  annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence")
   
   #MAIN_PLOT
   ggplotly(MAIN_PLOT)
