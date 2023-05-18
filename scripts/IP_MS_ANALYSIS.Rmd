@@ -8,13 +8,16 @@ output: html_document
 ``` {r, warning = FALSE, message = FALSE, echo = FALSE}
 library(tidyverse)
 library(data.table)
+library(jsonlite)
 library(janitor)
 library(ggrepel)
+library(UniprotR)
 library(knitr)
 library(svglite)
 library(readxl)
-library(UniprotR)
 library(plotly)
+library(fs)
+library(stringr)
 
 ################################################################################
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE, fig.height=7, fig.width=14)
@@ -45,12 +48,12 @@ TIME_CHECK$ORIGIN <- as.factor(TIME_CHECK$ORIGIN)
 The goal of the IP-MS analysis was to identify interactors of MyD88, IRAK4 and IRAK1 across different IL-1β stimulation time points, and how these interactions differ from those in unstimulated cells. Quantitative data were normalized to allow sensitive detection of proteins interacting with the respective bait proteins (i.e. MyD88, IRAK4 and IRAK1) upon IL-1β stimulation. 
 Protein abundances within each set (i.e., all samples corresponding to the same bait) were corrected by applying a scaling factor that normalizes the abundances of the bait proteins to their corresponding global mean. As a consequence, bait protein abundances are identical across conditions, enabling calculation of enrichment factors for interacting proteins in stimulated versus unstimulated control samples.
 
-To obtain an IL-1β dependent-myddosome interactome, Fenja was exclusively interested in  proteins enriched in the stimulated conditions (Fig. 7, right side of all scatter plots). She classified proteins as significantly enriched if they met the following criteria: 
+To obtain an IL-1β dependent-myddosome interactome, Fenja was exclusively interested in  proteins enriched under stimulated conditions (Fig. 7, right side of all scatter plots). She classified proteins as significantly enriched if they met the following criteria: 
   a) at least two-fold higher abundance after IL-1β stimulation (> 1 on the log2 scale), 
   b) a -log10 p- value larger than 2 (Fig. 7, y-axis)
   c) a false-discovery rate (FDR) of ≤ 0.05
   
-Using these criteria, the following proteins were identified as significantly enriched upon stimulation:
+Using these criteria, the following number of proteins were identified as significantly enriched upon stimulation per bait protein:
 
 ### MYD88
 
@@ -152,8 +155,9 @@ COMMON.fil.sel <- COMMON.fil %>% filter(MYD88.bool == T & (IRAK1.bool == T | IRA
 ```
 
 ``` {r}
-TIME_CHECK %>% filter(Protein.IDs == "Q9Z321") %>%
-  ggplot(aes(ORIGIN, X.LOG.P.value., col = PULLED_PROTEIN, shape = BAIT)) +
+TIME_CHECK %>% filter(Protein.IDs == "A2A4P0", PULLED_PROTEIN == "MYD88") %>%
+  #ggplot(aes(ORIGIN, X.LOG.P.value., col = PULLED_PROTEIN, shape = BAIT)) +
+  ggplot(aes(ORIGIN, X.LOG.P.value., col = BAIT)) +
   geom_point() +
   geom_line(aes(group = BAIT))
 
@@ -167,20 +171,8 @@ OUT    = paste0(FILES_LOC, FOLDER)
 
 ``` {r}
 if (ANNOTATE == T) {
-  if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))
-  } else if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))
-  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
-} else {
-  MAIN <- fread(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
-  if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
-    MAIN$RECYCLE_num <-unlist(lapply(strsplit(MAIN$RECYCLE, "_", fixed=TRUE), function(x) return(x[2])))
-  } else if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM_.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM_.csv"))
-  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
-}
+  source("~/Documents/Github/master_thesis/scripts/ANNOTATE_1.R")
+} else source("~/Documents/Github/master_thesis/scripts/ANNOTATE_2.R")
 
 MAIN$FILE[ MAIN$FILE %in% "MYD88_MYD88_x1"] <- 'MYD88_DD_x6_IRAK4_DD_x4_IRAK1_DD_x4'
 
@@ -285,23 +277,11 @@ OUT    = paste0(FILES_LOC, FOLDER)
 
 ``` {r}
 if (ANNOTATE == T) {
-  if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))
-  } else if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))
-  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
-} else {
-  MAIN <- fread(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
-  if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
-    MAIN$RECYCLE_num <-unlist(lapply(strsplit(MAIN$RECYCLE, "_", fixed=TRUE), function(x) return(x[2])))
-  } else if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))
-  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
-}
+  source("~/Documents/Github/master_thesis/scripts/ANNOTATE_1.R")
+} else source("~/Documents/Github/master_thesis/scripts/ANNOTATE_2.R")
 
 ## HISTOGRAM
-  MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 
+MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 
     ggplot(aes(iScore, fill = as.factor(N_MONOMERS))) +
     geom_vline(xintercept = 0.4, col = "gray40", linetype = "dotted", linewidth = 1) +
     geom_vline(xintercept = 0.5, col = "cornflowerblue", linetype = "dotted", linewidth = 1) +
@@ -352,20 +332,9 @@ OUT    = paste0(FILES_LOC, FOLDER)
 
 ``` {r}
 if (ANNOTATE == T) {
-  if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"_fromJSON_ANNOTATED.csv"))
-  } else if (file.exists(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries_annotated/", FOLDER,"fromSLURM_ANNOTATED.csv"))
-  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
-} else {
-  MAIN <- fread(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
-  if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"_fromJSON.csv"))
-    MAIN$RECYCLE_num <-unlist(lapply(strsplit(MAIN$RECYCLE, "_", fixed=TRUE), function(x) return(x[2])))
-  } else if (file.exists(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))) {
-    MAIN <- read.csv(paste0(FILES_LOC, "summaries/", FOLDER,"fromSLURM.csv"))
-  } else print("Please make sure correct path was provided or change to ANNOTATE = F.")
-}
+  source("~/Documents/Github/master_thesis/scripts/ANNOTATE_1.R")
+} else source("~/Documents/Github/master_thesis/scripts/ANNOTATE_2.R")
+
 
 ## HISTOGRAM
   MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 
