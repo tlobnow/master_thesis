@@ -87,7 +87,11 @@ jsonExtract <- function(JSON, OUT, FILE) {
   EXTRACT <- cbind(FILE, MODEL, TOL, pLDDT, pTM, piTM, iScore, iRes, iCnt, FILE_MODEL, NUM_CLUSTERS, N_MONOMERS)
   EXTRACT <- EXTRACT[, !duplicated(colnames(EXTRACT))]
   
-  write.table(EXTRACT, file = paste0(OUT,"_fromJSON.csv"),sep = ",", append = T, quote = F, row.names = F, col.names = F)
+  write.table(EXTRACT, file = paste0(OUT,".csv"),sep = ",", append = T, quote = F, row.names = F, col.names = F)
+  
+  EXTRACT_noRecycle <- EXTRACT %>% filter(!str_detect(RECYCLE, "_recycled_"))
+  write.table(EXTRACT_noRecycle, file = paste0(OUT,"_noRecycle.csv"),sep = ",", append = T, quote = F, row.names = F, col.names = F)
+  
 }
 
 #######################################################################################################################

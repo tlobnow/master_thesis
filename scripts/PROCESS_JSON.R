@@ -1,5 +1,6 @@
 # READ FILE
-JSON_EXTRACT  <- read.csv(paste0(RAW_SUMMARIES_PATH, FOLDER, "_fromJSON.csv"), header = F) %>% 
+# JSON_EXTRACT  <- read.csv(paste0(RAW_SUMMARIES_PATH, FOLDER, "_fromJSON.csv"), header = F) %>% 
+JSON_EXTRACT  <- read.csv(paste0(RAW_SUMMARIES_PATH, FOLDER, ".csv"), header = F) %>% 
   mutate(ORIGIN = FOLDER) %>% 
   # RENAME COLUMNS
   setnames(old = c("V1",    "V2",     "V3",    "V4",   "V5",   "V6",   "V7",   "V8",     "V9",  "V10",  "V11",        "V12",          "V13"), 

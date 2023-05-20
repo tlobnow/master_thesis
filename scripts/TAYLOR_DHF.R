@@ -48,7 +48,9 @@ PROCESS_SLURM = F
 
 ### DEFINE PATHS
 MAIN_FOLDER        = "DHF"
+FOLDER             = "DHF91"
 FOLDER             = "DHF119"
+
 FILES_LOC          = "~/Documents/Github/master_thesis/"
 MAIN               = ifelse(dir.exists(paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/", MAIN_FOLDER, "/")), 
                             yes =  paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/", MAIN_FOLDER, "/"),
