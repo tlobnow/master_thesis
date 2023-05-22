@@ -40,7 +40,7 @@ source(file = ifelse(exists("https://raw.githubusercontent.com/tlobnow/master_th
 
 ### SET MODES
 JSON_XTRCT    = T
-PROCESS_JSON  = T
+JSON_PROCESS  = T
 ANNOTATE      = T
 # avoid SLURM extraction (unfortunately quite error-prone..)
 SLURM_XTRCT   = F
@@ -50,6 +50,7 @@ PROCESS_SLURM = F
 ### DEFINE PATHS
 MAIN_FOLDER        = "ARL8B_UN93B"
 FOLDER             = "TLR7"
+FOLDER             = "ARL8B_UN93B_ALL"
 FILES_LOC          = "~/Documents/Github/master_thesis/"
 MAIN               = ifelse(dir.exists(paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/", MAIN_FOLDER, "/")), 
                             yes =  paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/", MAIN_FOLDER, "/"),
@@ -67,7 +68,7 @@ ANNOTATED_PATH     = paste0(FILES_LOC, "summaries_annotated/")  # added taxa inf
 if (JSON_XTRCT == T) {source("~/Documents/Github/master_thesis/scripts/JSON_XTRCT.R")}
 
 ### PROCESS JSON SUMMARY FILE
-if (PROCESS_JSON == T) {source("~/Documents/Github/master_thesis/scripts/PROCESS_JSON.R")}
+if (JSON_PROCESS == T) {source("~/Documents/Github/master_thesis/scripts/JSON_PROCESS.R")}
 
 ### ANNOTATE JSON SUMMARY FILE
 if (ANNOTATE == T) {
@@ -75,11 +76,12 @@ if (ANNOTATE == T) {
 } else source("~/Documents/Github/master_thesis/scripts/ANNOTATE_2.R")
 
 ### PLOTS
-## MAIN PLOT GEOM_POINT
+## MAIN PLOT GEOM_POINT (only pdb-available, no recycles = JE)
 source("~/Documents/Github/master_thesis/scripts/MAIN_PLOT_iScore_piTM_point.R")
-ggplotly(MAIN_PLOT_POINT)
+#ggplotly(MAIN_PLOT_POINT)
+MAIN_PLOT_POINT
 
-## MAIN PLOT HISTOGRAM
+## MAIN PLOT HISTOGRAM (all recycles = JE_all)
 source("~/Documents/Github/master_thesis/scripts/MAIN_PLOT_iScore_piTM_hist.R")
 MAIN_PLOT_HIST
 

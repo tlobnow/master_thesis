@@ -46,7 +46,7 @@ source(file = ifelse(exists("https://raw.githubusercontent.com/tlobnow/master_th
 
 ### SET MODES
 JSON_XTRCT    = T
-PROCESS_JSON  = T
+JSON_PROCESS  = T
 ANNOTATE      = T
 # avoid SLURM extraction (unfortunately quite error-prone..)
 SLURM_XTRCT   = F
@@ -74,7 +74,7 @@ ANNOTATED_PATH     = paste0(FILES_LOC, "summaries_annotated/")  # added taxa inf
 if (JSON_XTRCT == T) {source(paste0(FILES_LOC, "scripts/JSON_XTRCT.R"))}
 
 ### PROCESS JSON SUMMARY FILE
-if (PROCESS_JSON == T) {source(paste0(FILES_LOC, "scripts/PROCESS_JSON.R"))}
+if (JSON_PROCESS == T) {source(paste0(FILES_LOC, "scripts/JSON_PROCESS.R"))}
 
 ### ANNOTATE JSON SUMMARY FILE
 if (ANNOTATE == T) {

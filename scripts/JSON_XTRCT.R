@@ -24,9 +24,14 @@
 # }
 
 # Remove pre-existing CSV file, append would lead to duplicate rows
-csv_file <- paste0(RAW_SUMMARIES_PATH, FOLDER, "_fromJSON.csv")
+csv_file <- paste0(RAW_SUMMARIES_PATH, FOLDER, ".csv")
 if (file.exists(csv_file)) {
   file.remove(csv_file)
+}
+
+csv_file2 <- paste0(RAW_SUMMARIES_PATH, FOLDER, "_noRecycle.csv")
+if (file.exists(csv_file2)) {
+  file.remove(csv_file2)
 }
 
 LOCATION <- file.path(MAIN, FOLDER)
