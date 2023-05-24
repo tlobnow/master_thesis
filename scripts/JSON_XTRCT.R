@@ -37,9 +37,6 @@ if (file.exists(csv_file2)) {
 LOCATION <- file.path(MAIN, FOLDER)
 LIST     <- list.files(LOCATION)
 
-LOCATION <- "~/Documents/Github/mock_loc/"
-LIST     <- list.files(LOCATION)
-
 for (FILE in LIST) {
   print(paste("Processing", FILE))
   json_folder <- file.path(LOCATION, FILE, "JSON")
