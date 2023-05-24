@@ -18,26 +18,6 @@ source(file = ifelse(exists("https://raw.githubusercontent.com/tlobnow/master_th
                      yes =  "https://raw.githubusercontent.com/tlobnow/master_thesis/main/scripts/functions.R",
                      no  =  "~/Documents/Github/master_thesis/scripts/functions.R"))
 
-# STRUCTURE OF YOUR FOLDERS SHOULD LOOK AS FOLLOWS FOR JSON EXTRACTION:
-#
-# MAIN
-#   |____FOLDER
-#           |____FILE
-#                 |____JSON
-#                 |     |____FILE_ranking_model_1.json
-#                 |     |____FILE_ranking_model_2.json
-#                 |     |____FILE_ranking_model_3.json
-#                 |     |____FILE_ranking_model_4.json
-#                 |     |____FILE_ranking_model_5.json
-#                 |     
-#                 |____SLURMS
-#                 |     |____ ...
-#                 |
-#                 |____UNRLXD
-#                 |     |____ ...
-#                 |
-#                 |...
-
 ### SET MODES
 JSON_XTRCT    = T
 JSON_PROCESS  = T
@@ -46,16 +26,38 @@ ANNOTATE      = T
 SLURM_XTRCT   = F
 PROCESS_SLURM = F
 
+# STRUCTURE OF YOUR FOLDERS SHOULD LOOK AS FOLLOWS FOR JSON EXTRACTION:
+#
+# MAIN                              # where are the main folder collections located?
+#   |____MAIN_FOLDER                # upper level folder that contains the folder collection (e.g. MYD88, DHF, ..)
+#           |____FOLDER             # run folders of interest
+#                   |____FILE
+#                         |____JSON
+#                         |     |____FILE_ranking_model_1.json
+#                         |     |____FILE_ranking_model_2.json
+#                         |     |____FILE_ranking_model_3.json
+#                         |     |____FILE_ranking_model_4.json
+#                         |     |____FILE_ranking_model_5.json
+#                         |     
+#                         |____SLURMS
+#                         |     |____ ...
+#                         |
+#                         |____UNRLXD
+#                         |     |____ ...
+#                         |
+#                         |...
+
 ### DEFINE PATHS
 MAIN_FOLDER        = "DHF"
-FOLDER             = "DHF91"
-FOLDER             = "DHF119"
+FOLDER             = "DHF_ALL"
+#FOLDER             = "DHF91"
+#FOLDER             = "DHF119"
+
 
 FILES_LOC          = "~/Documents/Github/master_thesis/"
 MAIN               = ifelse(dir.exists(paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/", MAIN_FOLDER, "/")), 
                             yes =  paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/", MAIN_FOLDER, "/"),
                             no  =  "~/Documents/Github/transferGit/")
-
 OUT                = paste0(FILES_LOC, FOLDER)
 RAW_SUMMARIES_PATH = paste0(FILES_LOC, "raw_summaries/")        # preprocessed files (raw extracted json, slurms)
 SUMMARIES_PATH     = paste0(FILES_LOC, "summaries/")            # processed files
@@ -71,11 +73,23 @@ if (ANNOTATE     == T) {
 } else source(paste0(FILES_LOC, "scripts/ANNOTATE_2.R"))
 
 ### PLOTS
+
+plt <- JE %>%
+  #filter(FILE == "DHF119_x6") %>%
+  filter(FILE %in% c("DHF91_x6", "DHF119_x6")) %>%
+  ggplot(aes(iScore, piTM, col = FILE, shape = as.factor(MODEL))) +
+  geom_abline(col = "gray") +
+  geom_point() +
+  expand_limits(x=c(0,1), y=c(0,1))
+ggplotly(plt)
+
+DHF91 <- JE %>% filter(FILE == "DHF91_x6")
+
 ## MAIN PLOT GEOM_POINT
-source("~/Documents/Github/master_thesis/scripts/MAIN_PLOT_iScore_piTM_point.R")
-ggplotly(MAIN_PLOT_POINT)
+#source("~/Documents/Github/master_thesis/scripts/MAIN_PLOT_iScore_piTM_point.R")
+#ggplotly(MAIN_PLOT_POINT)
 
 ## MAIN PLOT HISTOGRAM
-source("~/Documents/Github/master_thesis/scripts/MAIN_PLOT_iScore_piTM_hist.R")
-MAIN_PLOT_HIST
+#source("~/Documents/Github/master_thesis/scripts/MAIN_PLOT_iScore_piTM_hist.R")
+#MAIN_PLOT_HIST
 
