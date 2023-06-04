@@ -1,0 +1,60 @@
+---
+title: "LCI_Analysis"
+date: ", Last edited on `r format(Sys.time(), '%d %B %Y')`"
+author: "Finn Lobnow"
+output: 
+  github_document:
+    toc: true
+    df_print: kable
+---
+
+```{r setup, include=FALSE}
+library(pacman)
+
+pacman::p_load(ggplot2, ggdark, data.table, dplyr, ggfx, viridis, ggridges, RColorBrewer, ggpubr, knitr)
+filter <- dplyr::filter
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+options(stringsAsFactors = FALSE)
+theme_set(theme_bw())
+theme_update(panel.grid.minor = element_blank())
+```
+
+
+## CELL LINES
+- BDLD_27H-MyD88-TIR-TRAF6-BD-GFP TRAF6
+- BDLD_50H-MyD88-TIR-TRAF6-BD-GFP TRAF6
+- BDLD_14H-MyD88-TIR-TRAF6-BD-GFP TRAF6
+- 3E10
+
+## PARAMETERS
+
+``` {r}
+PARAMETERS_PATH = "~/Documents/new_pipeline/pending_processing/batch_1_20230519/Input/parameter_tables/"
+
+parameters_lst_files = list.files(PARAMETERS_PATH)
+constants          = fread(file.path(PARAMETERS_PATH, "constants.csv"))
+dark_frames        = fread(file.path(PARAMETERS_PATH, "dark_frames.csv"))
+directories        = fread(file.path(PARAMETERS_PATH, "directories.csv"))
+exclusion_channels = fread(file.path(PARAMETERS_PATH, "exclusion_channels.csv"))
+images             = fread(file.path(PARAMETERS_PATH, "images.csv"))
+
+```
+
+``` {r}
+kable(constants)
+kable(dark_frames)
+kable(directories)
+kable(exclusion_channels)
+kable(images)
+```
+
+
+
+
+
+
+
+
+
+

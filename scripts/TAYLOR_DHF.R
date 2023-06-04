@@ -11,6 +11,7 @@ library(readxl)
 library(plotly)
 library(fs)
 library(stringr)
+library(ggalt)
 
 
 ### LOAD FUNCTIONS
@@ -74,16 +75,21 @@ if (ANNOTATE     == T) {
 
 ### PLOTS
 
+JE <- JE %>% mutate(DHF = "missing")
+#JE <- separate(data = JE, col = FILE2, into = c("DHF", "rest"), sep = "_")
+JE$DHF <- unlist(lapply(strsplit(JE$FILE,  "_", fixed=TRUE), function(x) return(x[1])))
+
 plt <- JE %>%
   #filter(FILE == "DHF119_x6") %>%
-  filter(FILE %in% c("DHF91_x6", "DHF119_x6")) %>%
-  ggplot(aes(iScore, piTM, col = FILE, shape = as.factor(MODEL))) +
+  #filter(FILE %in% c("DHF91_x6", "DHF119_x6")) %>%
+  ggplot(aes(iScore, piTM)) +
   geom_abline(col = "gray") +
-  geom_point() +
-  expand_limits(x=c(0,1), y=c(0,1))
-ggplotly(plt)
-
-DHF91 <- JE %>% filter(FILE == "DHF91_x6")
+  geom_encircle(aes(col = FILE, fill = FILE, alpha = 0.5), show.legend = F) +
+  geom_point(aes(shape = as.factor(MODEL), size = 3), alpha = 1) +
+  expand_limits(x=c(0,1), y=c(0,1)) +
+  facet_wrap(~DHF)
+#ggplotly(plt)
+plt
 
 ## MAIN PLOT GEOM_POINT
 #source("~/Documents/Github/master_thesis/scripts/MAIN_PLOT_iScore_piTM_point.R")

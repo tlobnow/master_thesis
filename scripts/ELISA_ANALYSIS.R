@@ -10,7 +10,9 @@ library(pacman)
 pacman::p_load(data.table, tidyr, dplyr, ggplot2, interleave, ggpubr)
 
 #Specify Input Folder (where plates are located)
-Input_Directory <- "/Volumes/TAYLOR-LAB/Finn/ELISA/20230504_ELISA/"
+Input_Directory <- "/Volumes/TAYLOR-LAB/Finn/ELISA/20230529_ELISA/"
+Input_Directory <- "/Volumes/TAYLOR-LAB/Finn/ELISA/20230512_ELISA/"
+
 
 CELL_LINES    <- "CELL_LINES.csv" # COHORT
 STIM_DAYS     <- "STIMULATION_DAYS.csv" # SAMPLE_DAY
@@ -32,7 +34,8 @@ if(!file.exists(Output_Directory)){
 }
 
 #Specify Dilution factor of supernatant
-DILUTION_FACTOR <- 5
+# DILUTION_FACTOR <- 5
+DILUTION_FACTOR <- 10
 
 #Calculating Number of plates in Input Folder
 for (x in 1:length(list.files(Input_Directory, pattern = "Plate_"))){
