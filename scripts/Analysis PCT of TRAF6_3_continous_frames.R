@@ -3,34 +3,54 @@ library(pacman)
 pacman::p_load(ggplot2, ggdark, data.table, dplyr, ggfx, viridis, ggridges, RColorBrewer, ggpubr)
 filter <- dplyr::filter
 
+data_tay <- "/Volumes/TAYLOR-LAB/"
+
+# check if the path exists 
+if (file.exists(data_tay)){
+  main = file.path("/Volumes/TAYLOR-LAB")
+} else { 
+  # use local path
+  main = file.path("~/Documents")
+}
+
 #load tables
-TablePaths <- c(#"/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl221_chMyD88-DHF91-TRAF6-BD-GFP_002/Essential.csv.gz",
-  # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl222_chMyD88-DHF91-TRAF6-BD-GFP_001/Essential.csv.gz",
-  # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl222_chMyD88-DHF91-TRAF6-BD-GFP_002/Essential.csv.gz",
-  # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/DHF58v2mid_DHF58v.2/20220401 6nM_DHF58v2mid_DHF58v.2_001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220516 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220610 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220615 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 002/Essential.csv.gz",
-  # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl234_TRAF6_MyD88-TRAF6-BD-3xA-GFP 008/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 002/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 005/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220530 1.5nM_cl236_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220615 1.5nM_cl236_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220530 1.5nM_cl237_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl238_TRAF6_MyD88-DHF91-TRAF6-BD-3xA-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220610 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220615 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 001/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220615 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 007/Essential.csv.gz",
-  "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220516 1.5nM_cl241_TRAF6_TIR-TRAF6-BD-GFP 001/Essential.csv.gz",
-  # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl242_TRAF6_MyD88-TIR-TRAF6-BD-3xA-GFP 001/Essential.csv.gz",
-  # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR/20220516 1.5nM_cl244_TRAF6_TIR-GFP 001/Essential.csv.gz",
-  # "/Volumes/TAYLOR-LAB/Finn/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz"
+TablePaths <- c(
+  # file.path(main, "/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl221_chMyD88-DHF91-TRAF6-BD-GFP_002/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl222_chMyD88-DHF91-TRAF6-BD-GFP_001/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl222_chMyD88-DHF91-TRAF6-BD-GFP_002/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/DHF58v2mid_DHF58v.2/20220401 6nM_DHF58v2mid_DHF58v.2_001/Essential.csv.gz"),
   
-  # "~/Documents/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz"
-  # "~/Documents/Mauriz_R/MyD88-TRAF6-BD TRAF6/20220516 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz",
-  # "~/Documents/Mauriz_R/MyD88-TRAF6-BD TRAF6/20220610 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz",
-  # "~/Documents/Mauriz_R/MyD88-TRAF6-BD TRAF6/20220615 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 002/Essential.csv.gz"
+  # normal synthetic
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220516 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220610 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220615 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 002/Essential.csv.gz"),
+  # "~/Documents/Mauriz_R/MyD88-TRAF6-BD TRAF6/20220516 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  # "~/Documents/Mauriz_R/MyD88-TRAF6-BD TRAF6/20220610 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  # "~/Documents/Mauriz_R/MyD88-TRAF6-BD TRAF6/20220615 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 002/Essential.csv.gz")
+  
+  # DHF91
+  # file.path(main, "/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 002/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 005/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220530 1.5nM_cl236_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220615 1.5nM_cl236_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220530 1.5nM_cl237_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  
+  # negative controls 3xA
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl234_TRAF6_MyD88-TRAF6-BD-3xA-GFP 008/Essential.csv.gz"),
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl242_TRAF6_MyD88-TIR-TRAF6-BD-3xA-GFP 001/Essential.csv.gz"),
+  # file.path(main, "/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl238_TRAF6_MyD88-DHF91-TRAF6-BD-3xA-GFP 001/Essential.csv.gz"),
+  
+  # TIR only
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220610 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220615 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220615 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 007/Essential.csv.gz"),
+  file.path(main, "/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220516 1.5nM_cl241_TRAF6_TIR-TRAF6-BD-GFP 001/Essential.csv.gz"),
+  
+  # BDLD - Bacterial Death-Like Domains
+  file.path(main, "/Finn/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz"),
+  file.path(main, "/Finn/new_pipeline/pending_processing/batch_2_20230602/Processing/06_Colocalization/BDLD_62H-MyD88-TIR-TRAF6-BD-GFP TRAF6/20230602 6nM_cl318-BDLD62H_TRAF6_MyD88_001/Essential.csv.gz")
+  # "~/Documents/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz")
   )
 
 Table <- lapply(TablePaths, 

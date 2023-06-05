@@ -49,26 +49,33 @@ The goal of the IP-MS analysis was to identify interactors of MyD88, IRAK4 and I
 Protein abundances within each set (i.e., all samples corresponding to the same bait) were corrected by applying a scaling factor that normalizes the abundances of the bait proteins to their corresponding global mean. As a consequence, bait protein abundances are identical across conditions, enabling calculation of enrichment factors for interacting proteins in stimulated versus unstimulated control samples.
 
 To obtain an IL-1β dependent-myddosome interactome, Fenja was exclusively interested in  proteins enriched under stimulated conditions (Fig. 7, right side of all scatter plots). She classified proteins as significantly enriched if they met the following criteria: 
+
   a) at least two-fold higher abundance after IL-1β stimulation (> 1 on the log2 scale), 
   b) a -log10 p- value larger than 2 (Fig. 7, y-axis)
   c) a false-discovery rate (FDR) of ≤ 0.05
   
+It should be mentioned that Fenja was primarily interested in retaining TNIP1 and used very harsh filters aside from that. Many protein interactions that are also legit may not be within the filtered range.
+
 Using these criteria, the following number of proteins were identified as significantly enriched upon stimulation per bait protein:
 
-### MYD88
 
-Significant proteins pulled down with MyD88:
-  - 15 min: 72
-  - 30 min: 379
-  - 60 min: 288
-Significant proteins pulled down with IRAK4:
-  - 15 min: 193
-  - 30 min: 240
-  - 60 min: 68
-Significant proteins pulled down with IRAK1:
-  - 15 min: 0
-  - 30 min: 31
-  - 60 min: 4
+#### Significant proteins pulled down with MyD88:
+
+- 15 min: 72
+- 30 min: 379
+- 60 min: 288
+  
+#### Significant proteins pulled down with IRAK4:
+
+- 15 min: 193
+- 30 min: 240
+- 60 min: 68
+  
+#### Significant proteins pulled down with IRAK1:
+
+- 15 min: 0
+- 30 min: 31
+- 60 min: 4
   
 
 #### HOW MANY PROTEINS WERE PULLED DOWN PER BAIT PROTEIN (REGARDLESS OF SIGNIFICANCE)
@@ -81,12 +88,12 @@ TIME_CHECK %>%
   kable(caption = "Unfiltered pulled proteins faceted by IP-Protein and Significance Level")
 
 # FIGURE 1
-TIME_CHECK %>% 
-  ggplot(aes(PULLED_PROTEIN, fill=PULLED_PROTEIN, col = KO)) + 
-  geom_bar(aes(alpha = 0.1)) + 
-  facet_grid(SIGNIF_CLASS~as.factor(ORIGIN), scales = "free_y") +
-  labs(x = "IP-Protein (bait)", y = "proteins pulled per bait [n]") +
-  ggtitle("Number of proteins pulled by IP-Protein and Significance Level (unfiltered)")
+# TIME_CHECK %>% 
+#   ggplot(aes(PULLED_PROTEIN, fill=PULLED_PROTEIN, col = KO)) + 
+#   geom_bar(aes(alpha = 0.1)) + 
+#   facet_grid(SIGNIF_CLASS~as.factor(ORIGIN), scales = "free_y") +
+#   labs(x = "IP-Protein (bait)", y = "proteins pulled per bait [n]") +
+#   ggtitle("Number of proteins pulled by IP-Protein and Significance Level (unfiltered)")
 
 # FIGURE 1 - faceted by BAIT
 TIME_CHECK %>% ggplot() + 
@@ -99,7 +106,7 @@ TIME_CHECK %>% ggplot() +
 ```
 
 
-### FENJA's FILTERS
+### FENJAs FILTERS
 
 ``` {r}
 # SUBSET THE TIME_CHECK MAIN DATAFRAME BY FENJA's SIGNIFICANCE FILTERS
@@ -129,7 +136,7 @@ kable(IRAK1.cnt, caption = "Filtered Proteins pulled down with IRAK1 per time po
 
 - Fenja mentioned the problem of crapome proteins
 - coming down with almost every IP (e.g. 1433 proteins)
-- retrieve protein accession numbers from gene names
+- retrieve protein accession numbers from gene names to retrieve crapome info (need human protein IDs since crapome site is limited)
 
 ``` {r}
 
@@ -137,32 +144,39 @@ kable(IRAK1.cnt, caption = "Filtered Proteins pulled down with IRAK1 per time po
 
 ```
 
+
+``` {r}
 #### Genes pulled with MyD88 that were also pulled with IRAK4 or IRAK1
 
-``` {r}
-COMMON <- as.data.frame(TIME_CHECK %>% filter(!is.na(Difference)) %>% select(BAIT, Protein.IDs) %>% group_by(Protein.IDs) %>% table())
-COMMON.fil <- COMMON %>% filter(Freq > 0) %>% pivot_wider(id_cols = 1:2, names_from = BAIT, values_from = BAIT) %>%
-  group_by(Protein.IDs) %>% fill(c(everything()), .direction = "downup") %>% ungroup() %>%  distinct(Protein.IDs, .keep_all = T) %>%
-  mutate(IRAK1.bool = case_when(is.na(IRAK1) ~ F, !is.na(IRAK1) ~ T),
-         IRAK4.bool = case_when(is.na(IRAK4) ~ F, !is.na(IRAK4) ~ T),
-         MYD88.bool = case_when(is.na(MYD88) ~ F, !is.na(MYD88) ~ T),
-         MYD88_KO_IRAK1.bool = case_when(is.na(`MYD88 KO IRAK1`) ~ F, !is.na(`MYD88 KO IRAK1`) ~ T),
-         MYD88_KO_IRAK4.bool = case_when(is.na(`MYD88 KO IRAK4`) ~ F, !is.na(`MYD88 KO IRAK4`) ~ T)) %>% 
-  select(-c(IRAK1, IRAK4, MYD88, `MYD88 KO IRAK4`, `MYD88 KO IRAK1`, Freq, ))
-
-COMMON.fil.sel <- COMMON.fil %>% filter(MYD88.bool == T & (IRAK1.bool == T | IRAK4.bool == T))
-
-```
-
-``` {r}
-TIME_CHECK %>% filter(Protein.IDs == "A2A4P0", PULLED_PROTEIN == "MYD88") %>%
-  #ggplot(aes(ORIGIN, X.LOG.P.value., col = PULLED_PROTEIN, shape = BAIT)) +
-  ggplot(aes(ORIGIN, X.LOG.P.value., col = BAIT)) +
-  geom_point() +
-  geom_line(aes(group = BAIT))
+# COMMON <- as.data.frame(TIME_CHECK %>% filter(!is.na(Difference)) %>% select(BAIT, Protein.IDs) %>% group_by(Protein.IDs) %>% table())
+# COMMON.fil <- COMMON %>% filter(Freq > 0) %>% pivot_wider(id_cols = 1:2, names_from = BAIT, values_from = BAIT) %>%
+#   group_by(Protein.IDs) %>% fill(c(everything()), .direction = "downup") %>% ungroup() %>%  distinct(Protein.IDs, .keep_all = T) %>%
+#   mutate(IRAK1.bool = case_when(is.na(IRAK1) ~ F, !is.na(IRAK1) ~ T),
+#          IRAK4.bool = case_when(is.na(IRAK4) ~ F, !is.na(IRAK4) ~ T),
+#          MYD88.bool = case_when(is.na(MYD88) ~ F, !is.na(MYD88) ~ T),
+#          MYD88_KO_IRAK1.bool = case_when(is.na(`MYD88 KO IRAK1`) ~ F, !is.na(`MYD88 KO IRAK1`) ~ T),
+#          MYD88_KO_IRAK4.bool = case_when(is.na(`MYD88 KO IRAK4`) ~ F, !is.na(`MYD88 KO IRAK4`) ~ T)) %>% 
+#   select(-c(IRAK1, IRAK4, MYD88, `MYD88 KO IRAK4`, `MYD88 KO IRAK1`, Freq, ))
+# 
+# COMMON.fil.sel <- COMMON.fil %>% filter(MYD88.bool == T & (IRAK1.bool == T | IRAK4.bool == T))
 
 ```
 
+``` {r}
+# TIME_CHECK %>% filter(Protein.IDs == "A2A4P0", PULLED_PROTEIN == "MYD88") %>%
+#   #ggplot(aes(ORIGIN, X.LOG.P.value., col = PULLED_PROTEIN, shape = BAIT)) +
+#   ggplot(aes(ORIGIN, X.LOG.P.value., col = BAIT)) +
+#   geom_point() +
+#   geom_line(aes(group = BAIT))
+
+```
+
+
+
+
+### COMPUTATIONAL SCREENING FOR PROTEIN-PROTEIN INTERACTION PARTNERS OF MYD88
+
+#### Histogram of distribution of the top iScores of significantly enriched proteins pulled with MyD88
 
 ``` {r}
 FOLDER = "MYD88"
@@ -194,12 +208,43 @@ MAIN_HIGHEST_iSCORES <- MAIN %>% group_by(FILE) %>% filter(iScore == max(iScore)
     annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
     annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
     annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence") +
-    ggtitle("Model Confidence assessed by iScore")
+    ggtitle("Model Confidence assessed by iScore") +
+    theme(legend.position = "none") +
+    ylab("n")
 ```
+
+#### iScore vs. piTM
+
+To create this plot, the JSON files of each run were extracted, iScores were grouped by file and highest iScores per file are displayed If multiple runs (different seeds) were performed per protein, the files were enumerated consecutively (_01, _02, ...)
+
+
+``` {r}
+MAIN_PLOT <- MAIN %>% group_by(Protein.IDs) %>%
+  ggplot(aes(iScore, piTM, col = CONTROL, label = Entry.Name)) +
+  geom_abline(col = "gray") +
+  geom_point(size = 3) +
+  #geom_line(aes(group = Protein.IDs), col = "gray40") +
+  ggrepel::geom_label_repel(data = MAIN, show.legend = F) +
+  scale_x_continuous(name = "iScore", breaks = c(0, 0.4, 0.5, 0.7, 1)) +
+  scale_y_continuous(name = "piTM", breaks = c(0, 0.5, 1)) +
+  theme(legend.position = "bottom") +
+  scale_color_discrete(name = "Control") +
+  ggtitle(paste0('Computational screening for PPI partners of ', FOLDER)) +
+  expand_limits(x=c(0,1), y=c(0,1)) +
+  annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
+  annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
+  annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence") +
+  theme(legend.position = "none")
+  
+  #MAIN_PLOT
+  ggplotly(MAIN_PLOT)
+```
+
 
 ``` {r}
 ## iScore vs. piTM plot prep
-SIGNIF_BY_iSCORE <- MAIN %>% filter(iScore >= 0.4, !is.na(Gene.Names)) %>% distinct(FILE, .keep_all = T)
+SIGNIF_BY_iSCORE <- MAIN %>% filter(iScore >= 0.4, !is.na(Gene.Names)) %>% 
+  distinct(FILE, .keep_all = T)
 MAIN <- MAIN %>% mutate(SIGNIF_BY_iSCORE = case_when(MAIN$FILE %in% SIGNIF_BY_iSCORE$FILE  ~ T,
                                                        !MAIN$FILE %in% SIGNIF_BY_iSCORE$FILE ~ F),
                           Entry.Name = case_when(!is.na(Entry.Name) ~ Entry.Name,
@@ -229,11 +274,11 @@ plt.joined.SIGNIF_BY_iSCORE.TIME_CHECK <- joined.SIGNIF_BY_iSCORE.TIME_CHECK %>%
   scale_x_continuous(name = "iScore", breaks = c(0, 0.4, 0.5, 0.7, 1)) +
   scale_y_continuous(name = "piTM", breaks = c(0, 0.5, 1)) +
   theme(legend.position = "bottom") +
-  ggtitle(paste0('Computational screening for PPI partners of ', FOLDER)) +
+  ggtitle(paste0('Computational screening for PPI partners of ', FOLDER), subtitle = 'colored by Time Point pulled (Origin)') +
   expand_limits(x=c(0,1), y=c(0,1)) +
   annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
   annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
-  annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence")
+  annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence") 
   
   #MAIN_PLOT
   ggplotly(plt.joined.SIGNIF_BY_iSCORE.TIME_CHECK)
@@ -241,34 +286,14 @@ plt.joined.SIGNIF_BY_iSCORE.TIME_CHECK <- joined.SIGNIF_BY_iSCORE.TIME_CHECK %>%
   
 ```
 
-To create figure XXX, the JSON files of each run were extracted, iScores were grouped by file and highest iScores are plotted. If multiple runs (different seeds) were performed per protein, the 
 
 
 
-``` {r}
-MAIN_PLOT <- MAIN %>% group_by(Protein.IDs) %>%
-  ggplot(aes(iScore, piTM, col = CONTROL, label = Entry.Name)) +
-  geom_abline(col = "gray") +
-  geom_point(size = 3) +
-  #geom_line(aes(group = Protein.IDs), col = "gray40") +
-  ggrepel::geom_label_repel(data = MAIN, show.legend = F) +
-  scale_x_continuous(name = "iScore", breaks = c(0, 0.4, 0.5, 0.7, 1)) +
-  scale_y_continuous(name = "piTM", breaks = c(0, 0.5, 1)) +
-  theme(legend.position = "bottom") +
-  scale_color_discrete(name = "Control") +
-  ggtitle(paste0('Computational screening for PPI partners of ', FOLDER)) +
-  expand_limits(x=c(0,1), y=c(0,1)) +
-  annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
-  annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
-  annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence")
-  
-  #MAIN_PLOT
-  ggplotly(MAIN_PLOT)
-```
 
 
+### COMPUTATIONAL SCREENING FOR PROTEIN-PROTEIN INTERACTION PARTNERS OF IRAK4
 
-### IRAK4
+#### Histogram of distribution of the top iScores of significantly enriched proteins pulled with IRAK4
 
 ``` {r}
 FOLDER = "IRAK4"
@@ -291,7 +316,9 @@ MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>%
     annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
     annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
     annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence") +
-    ggtitle("Model Confidence assessed by iScore")
+    ggtitle("Model Confidence assessed by iScore") +
+    theme(legend.position = "none") +
+    ylab("n")
 ```
 
 ``` {r}
@@ -317,13 +344,16 @@ MAIN %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>%
     expand_limits(x=c(0,1), y=c(0,1)) +
     annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
     annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
-    annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence")
+    annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence") +
+    theme(legend.position = "none")
   
   #MAIN_PLOT
   ggplotly(MAIN_PLOT)
 ```
 
-### IRAK1
+### COMPUTATIONAL SCREENING FOR PROTEIN-PROTEIN INTERACTION PARTNERS OF IRAK1
+
+#### Histogram of distribution of the top iScores of significantly enriched proteins pulled with IRAK1
 
 ``` {r}
 FOLDER = "IRAK1"
@@ -347,7 +377,9 @@ if (ANNOTATE == T) {
     annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
     annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
     annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence") +
-    ggtitle("Model Confidence assessed by iScore")
+    ggtitle("Model Confidence assessed by iScore") +
+    theme(legend.position = "none") +
+    ylab("n")
 ```
 
 ``` {r}
@@ -373,7 +405,8 @@ if (ANNOTATE == T) {
     expand_limits(x=c(0,1), y=c(0,1)) +
     annotate("text", x = 0.4, y = -0.05, label = "medium \n confidence") +
     annotate("text", x = 0.5, y = -0.05, label = "high \n confidence") +
-    annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence")
+    annotate("text", x = 0.7, y = -0.05, label = "very high \n confidence") +
+    theme(legend.position = "none")
   
   #MAIN_PLOT
   ggplotly(MAIN_PLOT)
