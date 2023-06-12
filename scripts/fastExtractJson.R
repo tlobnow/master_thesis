@@ -9,7 +9,9 @@ library(data.table)
 
 MAIN = paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/ARL8B_UN93B/ARL8B_UN93B_ALL/")
 MAIN = paste0("/Users/u_lobnow/Documents/Github/transferGit/")
+MAIN = paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/CHIMY_IL1RAP/")
 MAIN = paste0("/Volumes/TAYLOR-LAB/Finn/RESULTS/CHIMY_T6BM/")
+
 
 FILES <- list.files(MAIN)
 

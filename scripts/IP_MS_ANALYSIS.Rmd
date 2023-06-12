@@ -196,6 +196,8 @@ MAIN <- MAIN %>% mutate(CONTROL = case_when(FILE %in% c("MYD88_DD_x6_IRAK4_DD_x4
                         Protein.IDs = V1) %>% select(-V1)
 
 MAIN_HIGHEST_iSCORES <- MAIN %>% group_by(FILE) %>% filter(iScore == max(iScore))
+#write.table(MAIN_HIGHEST_iSCORES, "~/Desktop/MAIN_HIGHEST_iSCORES.csv", quote = F, sep = ",", row.names = F)
+
 
 ## HISTOGRAM
   MAIN_HIGHEST_iSCORES %>% #group_by(FILE) %>% filter(iScore == max(iScore)) %>% 

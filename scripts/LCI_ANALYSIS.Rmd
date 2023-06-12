@@ -25,120 +25,248 @@ theme_update(panel.grid.minor = element_blank())
 - BDLD_27H-MyD88-TIR-TRAF6-BD-GFP TRAF6
 - BDLD_50H-MyD88-TIR-TRAF6-BD-GFP TRAF6
 - BDLD_14H-MyD88-TIR-TRAF6-BD-GFP TRAF6
+- BDLD_62H-MyD88-TIR-TRAF6-BD-GFP TRAF6
+- BDLD_57H-MyD88-TIR-TRAF6-BD-GFP TRAF6
+- BDLD_13H-MyD88-TIR-TRAF6-BD-GFP TRAF6
+- BDLD_10H-MyD88-TIR-TRAF6-BD-GFP TRAF6
 - 3E10
 
 ## PARAMETERS
 
 ``` {r}
 
-data_tay <- "/Volumes/TAYLOR-LAB/"
+# data_tay <- "/Volumes/TAYLOR-LAB"
+# 
+# # check if the path exists
+# if (file.exists(data_tay)){
+#   main = file.path(data_tay)
+# } else {
+#   # use local path
+#   main = file.path("~/Documents")
+# }
+# 
+# 
+# #load tables
+# TablePaths <- c(
+# 
+#   # MyD88-T6BM
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220516 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220610 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD TRAF6/20220615 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 002/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR/20220516 1.5nM_cl244_TRAF6_TIR-GFP 001/Essential.csv.gz",
+# 
+#   # DHF91
+#   # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl221_chMyD88-DHF91-TRAF6-BD-GFP_002/Essential.csv.gz",
+#   # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl222_chMyD88-DHF91-TRAF6-BD-GFP_001/Essential.csv.gz",
+#   # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/chMyD88-DHF91-TRAF6-BD-GFP/20220401 6nM_cl222_chMyD88-DHF91-TRAF6-BD-GFP_002/Essential.csv.gz",
+#   # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
+#   # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 002/Essential.csv.gz",
+#   # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220516 1.5nM_cl236_TRAF6_chMyD88-DHF91-TRAF6-BD-GFP 005/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220530 1.5nM_cl236_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220615 1.5nM_cl236_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD TRAF6/20220530 1.5nM_cl237_TRAF6_MyD88-DHF91-TRAF6-BD-GFP 001/Essential.csv.gz",
+# 
+#   # T6BM 3xA
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl234_TRAF6_MyD88-TRAF6-BD-3xA-GFP 008/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-DHF91-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl238_TRAF6_MyD88-DHF91-TRAF6-BD-3xA-GFP 001/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD-3xA TRAF6/20220615 1.5nM_cl242_TRAF6_MyD88-TIR-TRAF6-BD-3xA-GFP 001/Essential.csv.gz",
+# 
+#   # NO DD, TIR-T6BM
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220610 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 001/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220615 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 001/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220615 1.5nM_cl240_TRAF6_MyD88-TIR-TRAF6-BD-GFP 007/Essential.csv.gz",
+#   # "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR-TRAF6-BD TRAF6/20220516 1.5nM_cl241_TRAF6_TIR-TRAF6-BD-GFP 001/Essential.csv.gz",
+# 
+#   # NO T6BM
+#   "/Volumes/TAYLOR-LAB/Mauriz/03_data_analysis/MyD88-TIR/20220516 1.5nM_cl244_TRAF6_TIR-GFP 001/Essential.csv.gz",
+# 
+#   # BDLD_27 and BDLD_14
+#   "~/Documents/new_pipeline/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_10H-MyD88-TIR-TRAF6-BD-GFP TRAF6/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_13H-MyD88-TIR-TRAF6-BD-GFP TRAF6/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_57H-MyD88-TIR-TRAF6-BD-GFP TRAF6/20230602 6nM_cl321-BDLD57H_TRAF6_MyD88_001/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_57H-MyD88-TIR-TRAF6-BD-GFP TRAF6/20230602 6nM_cl321-BDLD57H_TRAF6_MyD88_002/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_62H-MyD88-TIR-TRAF6-BD-GFP TRAF6/Essential.csv.gz",
+# 
+#   # "/Volumes/TAYLOR-LAB/Finn/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz",
+#   "~/Documents/new_pipeline/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_10H-MyD88-TIR-TRAF6-BD-GFP TRAF6/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_13H-MyD88-TIR-TRAF6-BD-GFP TRAF6/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_57H-MyD88-TIR-TRAF6-BD-GFP TRAF6/20230602 6nM_cl321-BDLD57H_TRAF6_MyD88_001/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_57H-MyD88-TIR-TRAF6-BD-GFP TRAF6/20230602 6nM_cl321-BDLD57H_TRAF6_MyD88_002/Essential.csv.gz",
+#   "~/Documents/new_pipeline/BDLD_62H-MyD88-TIR-TRAF6-BD-GFP TRAF6/Essential.csv.gz",
+#   "/Volumes/TAYLOR-LAB/Finn/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz"
+#   )
+# 
+# Table <- lapply(TablePaths, fread)
+# Table <- rbindlist(Table, fill=TRUE) #fill=TRUE since not all images are two color
+# 
+# # rename cohorts if necessary
+# Table$COHORT <- gsub("*-MyD88-TIR-TRAF6-BD-GFP TRAF6", replacement = "-TIR-T6BM TRAF6", x = Table$COHORT)
+# Table$COHORT <- gsub("MyD88-DHF91", replacement = "DHF91-TIR", x = Table$COHORT)
+# Table$COHORT <- gsub("*TRAF6-BD", replacement = "T6BM", x = Table$COHORT)
+# 
+# # remove the cl028 (3E10 control from data - background was super high - not quite usable)
+# Table <- Table[COHORT != "c;028-3E10-GFP"]
+# 
+# # get all the different cohorts in Table
+# unique(Table$COHORT)
+# unique(Table$LIGAND_DENSITY_CAT)
+# 
+# fwrite(x = Table,
+#        file = "~/Documents/Github/master_thesis/scripts/LCI_ANALYSIS_files/Table.csv",
+#        quote = F,
+#        sep = ",")
+# system("gzip -f ~/Documents/Github/master_thesis/scripts/LCI_ANALYSIS_files/Table.csv")
 
-# check if the path exists 
-if (file.exists(data_tay)){
-  main = file.path(data_tay)
-} else { 
-  # use local path
-  main = file.path("~/Documents")
-}
-
-PARAMETERS_PATH = file.path(main, "/new_pipeline/pending_processing/batch_1_20230519/Input/parameter_tables/")
-
-parameters_lst_files = list.files(PARAMETERS_PATH)
-constants          = fread(file.path(PARAMETERS_PATH, "constants.csv"))
-dark_frames        = fread(file.path(PARAMETERS_PATH, "dark_frames.csv"))
-directories        = fread(file.path(PARAMETERS_PATH, "directories.csv"))
-exclusion_channels = fread(file.path(PARAMETERS_PATH, "exclusion_channels.csv"))
-images             = fread(file.path(PARAMETERS_PATH, "images.csv"))
+Table <- fread("~/Documents/Github/master_thesis/scripts/LCI_ANALYSIS_files/Table.csv.gz")
 
 ```
 
-``` {r}
-kable(constants)
-kable(dark_frames)
-kable(directories)
-kable(exclusion_channels)
-kable(images)
-```
+### Grouping and summarizing the data
 
-``` {r}
-#load tables
-TablePaths <- c(
-  file.path(main, "Mauriz_R/MyD88-TRAF6-BD TRAF6/20220516 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz"),
-  file.path(main, "Mauriz_R/MyD88-TRAF6-BD TRAF6/20220610 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 001/Essential.csv.gz"),
-  file.path(main, "Mauriz_R/MyD88-TRAF6-BD TRAF6/20220615 1.5nM_cl232_TRAF6_MyD88-TRAF6-BD-GFP 002/Essential.csv.gz"),
-  file.path(main, "new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz")
-  
-  # BDLD - Bacterial Death-Like Domains
-  # file.path(main, "/Finn/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz"),
-  # file.path(main, "/Finn/new_pipeline/pending_processing/batch_2_20230602/Processing/06_Colocalization/BDLD_62H-MyD88-TIR-TRAF6-BD-GFP TRAF6/20230602 6nM_cl318-BDLD62H_TRAF6_MyD88_001/Essential.csv.gz")
-  # "~/Documents/new_pipeline/pending_processing/batch_1_20230519/Output/Essential.csv.gz")
-  )
+#### What is the percentage of tracks recruiting TRAF6?
 
-Table <- lapply(TablePaths, fread)
-Table <- rbindlist(Table, fill=TRUE) #fill=TRUE since not all images are two color
-
-```
+- group by MyD88
+- define Colocalization, so the threshold at which recruitment is counted, as complementary normalized intensity ≥ 1.5
+- group by Cohort, Image, Universal Track ID, and streak (grouping variable for filtering continuous frames above the threshold)
+- define dwell frames as the colocalization sum
+- we filter for at least 3 dwell frames
 
 
 ``` {r}
-#start grouping and summarizing the data
-#Find out the percentage of spots recruiting TRAF6
-Colocalisation_List <-
-  Table %>% filter(PROTEIN == "MyD88") %>% 
-  arrange(UNIVERSAL_SPOT_ID) %>% 
-  #threshold at which recruitment is counted
-  mutate(COLOCALIZATION = COMPLEMENTARY_NORMALIZED_INTENSITY_1 >= 1.5) %>% 
-  group_by(UNIVERSAL_TRACK_ID) %>%
-  #new column which creates a grouping variable for continuous frames which are above threshold
-  mutate(STREAK = cumsum(!COLOCALIZATION)) %>%
-  #group continuous frames above threshold together
-  group_by(COHORT,IMAGE,UNIVERSAL_TRACK_ID,STREAK) %>% 
-  #number of frames that complementary protein is above threshold in a continuous stretch
-  summarise(DWELL_FRAMES = sum(COLOCALIZATION)) %>% 
-  #only count 3 continuous frames as recruitment
-  filter(DWELL_FRAMES >= 1) %>% 
-  distinct(UNIVERSAL_TRACK_ID) %>% 
-  as.data.table()
+# # start grouping and summarizing the data
+# # Find out the percentage of spots recruiting TRAF6
+# Colocalisation_List <-
+#   Table %>% filter(PROTEIN == "MyD88") %>%
+#   arrange(UNIVERSAL_SPOT_ID) %>%
+#   #threshold at which recruitment is counted
+#   mutate(COLOCALIZATION = COMPLEMENTARY_NORMALIZED_INTENSITY_1 >= 1.5) %>%
+#   group_by(UNIVERSAL_TRACK_ID) %>%
+#   #new column which creates a grouping variable for continuous frames which are above threshold
+#   mutate(STREAK = cumsum(!COLOCALIZATION)) %>%
+#   #group continuous frames above threshold together
+#   group_by(COHORT,
+#            IMAGE,
+#            UNIVERSAL_TRACK_ID,
+#            STREAK) %>%
+#   #number of frames that complementary protein is above threshold in a continuous stretch
+#   summarise(DWELL_FRAMES = sum(COLOCALIZATION)) %>%
+#   #only count 3 continuous frames as recruitment
+#   filter(DWELL_FRAMES >= 3) %>%
+#   # keep distinct track IDs
+#   distinct(UNIVERSAL_TRACK_ID) %>%
+#   as.data.table()
+# 
+# fwrite(x = Colocalisation_List,
+#        file = "~/Documents/Github/master_thesis/scripts/LCI_ANALYSIS_files/Colocalisation_List.csv",
+#        quote = F,
+#        sep = ",")
+
+Colocalisation_List <- fread("~/Documents/Github/master_thesis/scripts/LCI_ANALYSIS_files/Colocalisation_List.csv")
+
 ```
 
 
 ``` {r}
 Track_rec <- c(unique(Colocalisation_List$UNIVERSAL_TRACK_ID))
 
-Puncta_Cell<-Table %>% 
-  filter(PROTEIN=="MyD88",
+# Filter and process data from the 'Table' dataset
+#
+# This code filters and processes data from the 'Table' dataset based on specific conditions,
+# calculates additional metrics, and generates a summarized result as a data table.
+
+# Step 1: Filter the dataset
+# Filter rows based on specific conditions
+# - PROTEIN must be "MyD88"
+# - NORMALIZED_INTENSITY must be greater than or equal to 1.5
+# - FRAMES_ADJUSTED must be less than or equal to 100
+# - FRAMES_SINCE_LANDING must be less than or equal to 200
+# - COHORT must not be "chMyD88-DHF91-TRAF6-BD-GFP"
+# - COHORT must not be "DHF58v2mid_DHF58v.2"
+# - COHORT must not be "MyD88-TIR"
+Puncta_Cell <- Table %>%
+  filter(PROTEIN == "MyD88",
          NORMALIZED_INTENSITY >= 1.5,
          FRAMES_ADJUSTED <= 100,
-         FRAMES_SINCE_LANDING<=200,
-         COHORT!="chMyD88-DHF91-TRAF6-BD-GFP",
-         COHORT!="DHF58v2mid_DHF58v.2",
-         COHORT!="MyD88-TIR") %>% 
-  group_by(UNIVERSAL_TRACK_ID) %>% 
-  mutate(LIFETIME=max(TIME_ADJUSTED),
-         LIFETIME_FRAMES=max(FRAMES_ADJUSTED),
-         MAX_NORMALIZED_INTENSITY=max(NORMALIZED_INTENSITY),
-         MAX_COMPLEMENTARY_NORMALIZED_INTENSITY_1=max(COMPLEMENTARY_NORMALIZED_INTENSITY_1),
-         RECRUITEMENT=case_when(UNIVERSAL_TRACK_ID %in% Track_rec ~ "+ve", TRUE ~ "-ve")) %>% 
-  filter(LIFETIME_FRAMES>=3,
-         FRAMES_ADJUSTED==0) %>%
-  group_by(COHORT,IMAGE,CELL) %>%
-  summarize(T6p=sum(RECRUITEMENT=="+ve")/(sum(RECRUITEMENT=="+ve")+sum(RECRUITEMENT=="-ve")),
-            T6n=sum(RECRUITEMENT=="-ve")/(sum(RECRUITEMENT=="+ve")+sum(RECRUITEMENT=="-ve"))) %>% 
-  as.data.table()
+         FRAMES_SINCE_LANDING <= 200,
+         !COHORT %in% c("chMyD88-DHF91-TRAF6-BD-GFP",
+                        "DHF58v2mid_DHF58v.2",
+                        "MyD88-TIR"))
+
+# Step 2: Group the data by UNIVERSAL_TRACK_ID
+# Calculate additional metrics within each group
+# - LIFETIME: Maximum value of TIME_ADJUSTED
+# - LIFETIME_FRAMES: Maximum value of FRAMES_ADJUSTED
+# - MAX_NORMALIZED_INTENSITY: Maximum value of NORMALIZED_INTENSITY
+# - MAX_COMPLEMENTARY_NORMALIZED_INTENSITY_1: Maximum value of COMPLEMENTARY_NORMALIZED_INTENSITY_1
+# - RECRUITEMENT: Assigns "+ve" if UNIVERSAL_TRACK_ID is in Track_rec, otherwise "-ve"
+Puncta_Cell <- Puncta_Cell %>%
+  group_by(UNIVERSAL_TRACK_ID) %>%
+  mutate(LIFETIME = max(TIME_ADJUSTED),
+         LIFETIME_FRAMES = max(FRAMES_ADJUSTED),
+         MAX_NORMALIZED_INTENSITY = max(NORMALIZED_INTENSITY),
+         MAX_COMPLEMENTARY_NORMALIZED_INTENSITY_1 = max(COMPLEMENTARY_NORMALIZED_INTENSITY_1),
+         RECRUITEMENT = case_when(UNIVERSAL_TRACK_ID %in% Track_rec ~ "+ve", TRUE ~ "-ve"))
+
+# Step 3: Filter the dataset again
+# Filter rows based on additional conditions
+# - LIFETIME_FRAMES must be greater than or equal to 3
+# - FRAMES_ADJUSTED must be equal to 0
+Puncta_Cell <- Puncta_Cell %>%
+  filter(LIFETIME_FRAMES >= 3,
+         FRAMES_ADJUSTED == 0)
+
+# Step 4: Group the data by COHORT, IMAGE, and CELL
+# Calculate the final summarized metrics within each group
+# - T6p: Ratio of the count of positive RECRUITEMENT to the total count of RECRUITEMENT values (positive and negative)
+# - T6n: Ratio of the count of negative RECRUITEMENT to the total count of RECRUITEMENT values (positive and negative)
+Puncta_Cell <- Puncta_Cell %>%
+  group_by(COHORT, IMAGE, CELL) %>%
+  summarize(T6p = sum(RECRUITEMENT == "+ve") / (sum(RECRUITEMENT == "+ve") + sum(RECRUITEMENT == "-ve")),
+            T6n = sum(RECRUITEMENT == "-ve") / (sum(RECRUITEMENT == "+ve") + sum(RECRUITEMENT == "-ve")))
+
+# Convert the result to a data table
+Puncta_Cell <- as.data.table(Puncta_Cell)
+
 
 #create the stats variable to add mean etc. to plots
-Stats<- Stats <- Puncta_Cell %>% 
+# Stats<- Stats <- Puncta_Cell %>% 
+#   group_by(COHORT) %>%
+#   mutate(SD_T6p=sd(T6p)) %>% 
+#   summarize(T6p=mean(T6p),
+#             SEM_T6p=mean(SD_T6p/sqrt(n()))) %>% 
+#   as.data.table()
+
+# Calculate statistics using the median and median absolute deviation (MAD)
+# This code calculates statistics using the median and median absolute deviation (MAD) for the 'T6p' variable in the 'Puncta_Cell' dataset.
+# The statistics include the median and MAD for each 'COHORT' group.
+
+# Step 1: Calculate the median and median absolute deviation (MAD) for 'T6p' within each 'COHORT' group
+# Group the data by 'COHORT' and calculate the median and MAD for 'T6p' within each group
+Stats <- 
+  Stats<- 
+  Puncta_Cell %>%
   group_by(COHORT) %>%
-  mutate(SD_T6p=sd(T6p)) %>% 
-  summarize(T6p=mean(T6p),
-            SEM_T6p=mean(SD_T6p/sqrt(n()))) %>% 
+  summarize(T6p = median(T6p),
+            MAD_T6p = median(abs(T6p - median(T6p)))) %>%
+  # Convert the result to a data table
   as.data.table()
 
-#Add stats for the images taken to clean up violin
-Replicates<- Puncta_Cell %>% 
-  group_by(IMAGE,COHORT) %>% 
-  summarize(T6p=mean(T6p)) %>% 
-  as.data.table()  
+# #Add stats for the images taken to clean up violin
+# Replicates<- Puncta_Cell %>% 
+#   group_by(IMAGE,COHORT) %>% 
+#   summarize(T6p=mean(T6p)) %>% 
+#   as.data.table()  
+
+# Step 1: Calculate the median 'T6p' for each combination of 'IMAGE' and 'COHORT' groups
+# Group the data by 'IMAGE' and 'COHORT' and calculate the median 'T6p' within each group
+Replicates <- Puncta_Cell %>%
+  group_by(IMAGE, COHORT) %>%
+  summarize(T6p = median(T6p))
+
+# Step 2: Convert the result to a data table
+Replicates <- as.data.table(Replicates)
 ```
 
 
@@ -146,13 +274,22 @@ Replicates<- Puncta_Cell %>%
 
 Percentage of Spots above threshold Lifetime/ Max Intensity per Cell per Cell line
 
-``` {r}
-ggplot(data=Puncta_Cell,aes(x=COHORT, y=T6p))+
-  geom_violin(alpha=0.75, fill="gray", 
-              scale = "width")+
+``` {r, fig.width = 25}
+Puncta_Cell %>%
+  ggplot(aes(x=COHORT, y=T6p*100)) +
+  geom_violin(alpha=0.75, 
+              aes(fill = COHORT),
+              # fill="gray", 
+              scale = "width") +
   geom_jitter(data=Replicates,
-              color="black")+
-  geom_errorbar(data = Stats,aes(x = COHORT, y= T6p, ymin = T6p-SEM_T6p, ymax = T6p+SEM_T6p),
+              color="black") +
+  geom_errorbar(data = Stats,aes(x = COHORT, 
+                                 y= T6p*100, 
+                                 # ymin = T6p-SEM_T6p, 
+                                 # ymax = T6p+SEM_T6p
+                                 ymin = T6p*100-MAD_T6p,
+                                 ymax = T6p*100+MAD_T6p
+                                 ),
                 color="black", 
                 width=0.4) +
   stat_summary(data=Stats,
@@ -163,7 +300,9 @@ ggplot(data=Puncta_Cell,aes(x=COHORT, y=T6p))+
                position= position_dodge(width = 1),
                colour = "black")+
   labs(x="Cell Lines", y="Percentage of Puncta recruiting TRAF6 per Cell") +
-  theme_classic()
+  theme_classic() + theme(legend.position = "none") +
+  theme(axis.text = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 25, face = "bold"))
 
 ```
 
@@ -185,22 +324,23 @@ MyD88Int <-Table %>%
          MAX_COMPLEMENTARY_NORMALIZED_INTENSITY_1 = max(COMPLEMENTARY_NORMALIZED_INTENSITY_1)) %>% 
   filter(LIFETIME_FRAMES>=3, 
          FRAMES_ADJUSTED==0) %>% as.data.table()
-```
 
-```{r}
 ggplot(data = MyD88Int,
   aes(x = MAX_NORMALIZED_INTENSITY,
       y = MAX_COMPLEMENTARY_NORMALIZED_INTENSITY_1)) +
   geom_hex(bins=15) +
   scale_x_continuous(limits=c(0, 50)) +
   scale_y_continuous(limits=c(0, 20)) +
-  facet_wrap(~COHORT)+
+  facet_wrap(~COHORT
+             #, ncol = 1
+             )+
   scale_fill_viridis(trans = 'log10') +
   geom_smooth(method = "lm", se = FALSE) +
   stat_cor(method="spearman", color="red")+
   labs(x="Normalized Max Intensity of MyD88",
        y="Normalized Max Intensity of TRAF6")+
-  theme_classic()
+  theme_classic() +
+  theme(legend.position = "bottom")
 ```
 
 ### Plot the MyD88 intensity over TRAF6 intensity using geom_path
@@ -210,7 +350,7 @@ TRAF6col <- Table %>%
   filter(PROTEIN=="MyD88") %>% 
   mutate(COMPLEMENTARY_NORMALIZED_INTENSITY_1 = round(COMPLEMENTARY_NORMALIZED_INTENSITY_1)) %>% 
   group_by(COHORT, COMPLEMENTARY_NORMALIZED_INTENSITY_1) %>% 
-  summarize(NORMALIZED_INTENSITY = mean(NORMALIZED_INTENSITY)) %>%
+ summarize(NORMALIZED_INTENSITY = mean(NORMALIZED_INTENSITY)) %>%
   as.data.table()
 
 ggplot(TRAF6col, aes(x = NORMALIZED_INTENSITY,
@@ -221,7 +361,8 @@ ggplot(TRAF6col, aes(x = NORMALIZED_INTENSITY,
   scale_y_continuous(limits = c(0,10)) +
   labs(x="Normalized Intensity of MyD88",
        y="Normalized Intensity of TRAF6") + 
-  theme_classic()
+  theme_classic() +
+  facet_wrap(~COHORT)
 ```
 
 ### Percentage of puncta at distinct size/ Lifetime to recruit TRAF6
@@ -234,7 +375,8 @@ PCTTRAF6 <- Table %>%
          FRAMES_SINCE_LANDING <= 200,
          COHORT!="chMyD88-DHF91-TRAF6-BD-GFP",
          COHORT!="DHF58v2mid_DHF58v.2",
-         COHORT!="MyD88-TIR") %>% 
+         #COHORT!="MyD88-TIR"
+         ) %>% 
   group_by(UNIVERSAL_TRACK_ID) %>% 
   mutate(LIFETIME = max(TIME_ADJUSTED),
          LIFETIME_FRAMES = max(FRAMES_ADJUSTED),
@@ -255,9 +397,12 @@ Stats <- PCTTRAF6 %>%
 kable(Stats)
 ```
 
-### Percentagw of TRAF6 at different Max normalized Intensities
+### Percentage of MYD88 tracks that recruit TRAF6 vs MyD88 intensity
+
 
 ``` {r}
+#TRAF6 at different Max normalized Intensities
+
 PCTTRAF6Int<-
   PCTTRAF6 %>% 
   group_by(
@@ -300,4 +445,44 @@ ggplot(
     y="% of Tracks recruiting TRAF6"
   )+
   theme_bw()
+```
+
+### Plot the percentage of TRAF6 recruitement at different Lifetimes
+
+
+``` {r}
+PCTTRAF6 <- PCTTRAF6[COHORT != "c;028-3E10-GFP"]
+
+PCTTRAF6LT <- PCTTRAF6 %>% 
+  group_by(LIFETIME, COHORT) %>% 
+  filter(n() >= 3) %>%
+  summarize(T6p=sum(RECRUITEMENT=="+ve")/(sum(RECRUITEMENT=="+ve")+sum(RECRUITEMENT=="-ve")),
+            T6n=sum(RECRUITEMENT=="-ve")/(sum(RECRUITEMENT=="+ve")+sum(RECRUITEMENT=="-ve"))) %>%
+  as.data.table()
+
+
+ggplot(data=PCTTRAF6LT,
+       aes(x = LIFETIME, y = T6p, fill = COHORT)) +
+  geom_smooth(level = 0.90, color = "black") +
+  scale_x_continuous(limits = c(0,400)) +
+  geom_jitter(color = "black") +
+  facet_wrap(~COHORT) +
+  labs(x = "Lifetime of Tracks",
+       y = "% of Tracks recruiting TRAF6") +
+  theme_bw()
+
+ggplot(PCTTRAF6, aes(x = LIFETIME, y = ..ndensity.., fill = COHORT)) +
+  geom_histogram(binwidth = 5,
+                 colour="black",
+                 alpha=0.75) +
+  #geom_vline(data = Stats, aes(xintercept = LIFETIME),
+  #           color="black", 
+  #           linetype="dashed", 
+  #           linewidth=1) +
+  scale_x_continuous(limits = c(0,400)) +
+  facet_wrap(~COHORT) +
+  labs(x = "Lifetime of Tracks",
+       y = "Density") +
+  theme_bw()
+# get mean / median values written down
 ```
