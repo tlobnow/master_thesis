@@ -83,8 +83,10 @@ jsonExtract <- function(JSON, OUT, FILE) {
   FILE_MODEL <- paste(FILE, MODEL, sep = "_")
   NUM_CLUSTERS <- json$clusters[[iScore$RECYCLE[1]]]$num_clusters
   N_MONOMERS <- length(json$chains)
+  DATE       <- sub(".*_(\\d+)_.*", "\\1", names(json$clusters))
   
   EXTRACT <- cbind(FILE, MODEL, TOL, pLDDT, pTM, piTM, iScore, iRes, iCnt, FILE_MODEL, NUM_CLUSTERS, N_MONOMERS)
+  EXTRACT$DATE = lubridate::as_date(DATE)
   EXTRACT <- EXTRACT[, !duplicated(colnames(EXTRACT))]
   
   write.table(EXTRACT, file = paste0(OUT,".csv"),sep = ",", append = T, quote = F, row.names = F, col.names = F)
