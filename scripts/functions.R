@@ -150,3 +150,106 @@ join_timepoints <- function(DF1, DF2, DF3, OUT) {
   DF <- full_join(DF1, DF2)
   DF <- full_join(DF, DF3)
 }
+
+ELISA_Fx <- function(Input_Directory) {
+  # Initialize as an empty data frame
+  All_plates_data = data.frame()
+  
+  # Get the list of subdirectories matching the pattern "Plate_"
+  subdirs <- list.files(Input_Directory, recursive = FALSE, full.names = TRUE, pattern = "^Plate_\\d+_\\d{8}$")
+  
+  if (length(subdirs) > 0) {
+    print("Plates exist!")
+    for (input_plate_dir in subdirs) {
+      
+      Input_plate <- input_plate_dir
+      
+      #Reading Plate Treatment 
+      MEASUREMENTS <- fread(paste0(Input_plate, "/MEASUREMENTS.csv"), header = F)
+      CELL_LINES   <- fread(paste0(Input_plate, "/CELL_LINES.csv"), header = F)
+      CONDITIONS   <- fread(paste0(Input_plate, "/CONDITIONS.csv"), header = F)
+      STIM_DAYS    <- fread(paste0(Input_plate, "/STIM_DAYS.csv"), header = F)
+      
+      
+      #Converting tables into vector for to make a single table
+      MEASUREMENTS <- as.vector(as.matrix(MEASUREMENTS))
+      CELL_LINES   <- as.vector(as.matrix(CELL_LINES))
+      CONDITIONS   <- as.vector(as.matrix(CONDITIONS))
+      STIM_DAYS    <- as.vector(as.matrix(STIM_DAYS))
+      
+      #Creating Table containing all plate Information
+      Plate <- NULL
+      Plate$MEASUREMENTS <- MEASUREMENTS
+      Plate$CELL_LINES <- CELL_LINES
+      Plate$CONDITIONS <- CONDITIONS
+      Plate$STIM_DAYS <- STIM_DAYS
+      
+      rm(MEASUREMENTS, CELL_LINES, CONDITIONS, STIM_DAYS)
+      
+      Plate <- Plate %>% as.data.table()
+      
+      #Removing Empty Wells
+      Plate <- Plate %>% filter(CELL_LINES != "BLANK") %>% as.data.table()
+      
+      # Standard Curve ---------------------------------------------------------
+      Plate_Standards <- Plate %>% 
+        filter(CONDITIONS == "CALIBRATION") %>% 
+        group_by(CELL_LINES) %>% 
+        summarise(MEASUREMENTS_mean = mean(MEASUREMENTS)) %>%  #, 
+        #MEASUREMENTS_median = median(MEASUREMENTS)) %>%  
+        mutate(CELL_LINES = as.numeric(CELL_LINES)) %>% 
+        arrange(CELL_LINES)
+      
+      Fit     <- lm(CELL_LINES ~ MEASUREMENTS_mean - 1, data = Plate_Standards) #linear model of the Standard curve. -1 omits the intercept
+      R       <- summary(Fit)$r.squared
+      Rsquare <- signif(R, digits = 4)
+      
+      print(paste0("IL2-Amount = slope*Intensity"))
+      print(paste0("IL2-Amount = ", Fit$coefficients[1],"*Intensity"))
+      
+      Plate_Standards <- Plate_Standards %>% 
+        mutate(Fit_Test = (Fit$coefficients[1]*MEASUREMENTS_mean))
+      
+      # Plotting Standard Curve
+      p <- ggplot(data = Plate_Standards) +
+        geom_point(aes(x = MEASUREMENTS_mean, y = CELL_LINES), size = 5) +
+        geom_line(aes(x = MEASUREMENTS_mean, y = Fit_Test), linetype = "dashed") +
+        annotate('text', x = 0.15, y = 700, label = paste0("R^2 = ", Rsquare), size = 10) +
+        annotate('text', 
+                 x = max(Plate_Standards$MEASUREMENTS_mean) - (0.25 * max(Plate_Standards$MEASUREMENTS_mean)),
+                 y = 150, label = paste0("IL-Amount = \n", signif(Fit$coefficients[1], digits = 4), " * Intensity")) +
+        labs(x = "Measured Values",
+             y = "IL-Concentration (pg/mL)") +
+        ggtitle(label = paste0(basename(Input_plate)),
+                subtitle = paste0("R^2 = ", Rsquare, "\n IL-Amount = ", signif(Fit$coefficients[1], digits = 4), " * Intensity")) +
+        theme_classic() +
+        theme(axis.title = element_text(size = 30),
+              axis.text = element_text(size = 20))
+      
+      # Saving the plot
+      Save_Name <- paste0(basename(Input_plate), "_Standard_Curve.pdf")
+      Save_Name <- file.path(Output_Directory, Save_Name)
+      ggsave(Save_Name, plot = p, height = 3 * 3, width = 5 * 4)
+      
+      # Further processing of the Plate object if needed
+      
+      
+      # Fitting Data To Standarad Curve ----------------------------------------
+      Plate <- Plate %>% 
+        filter(CONDITIONS != "CALIBRATION") %>% 
+        mutate(Plate = as.numeric(gsub("^Plate_(\\d+)_\\d{8}$", "\\1", basename(input_plate_dir))),
+               Date  = as_date(str_extract(basename(input_plate_dir), "\\d{8}")),
+               Dilution_Factor = case_when(#Date <= "2023-01-01" ~ DILUTION_FACTOR_2,
+                 Date <= "2023-05-09" ~ DILUTION_FACTOR_5,
+                 Date >  "2023-05-09" ~ DILUTION_FACTOR_10),
+               MEASUREMENTS = as.numeric(MEASUREMENTS),
+               IL2_concentration = (Fit$coefficients[1]*MEASUREMENTS),
+               IL2_concentration_DILUTION_FACTOR = IL2_concentration*Dilution_Factor)
+      
+      All_plates_data <- rbind(All_plates_data, Plate)
+    }
+  } else {
+    print("No plates found!")
+  }
+  return(All_plates_data)
+}
